@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="folder">
+<title>folder</title>
+<style>
+  .m .bd { animation: bob 3.4s ease-in-out infinite; animation-delay: var(--d); }
+  .m .gl { animation: glow 2.6s ease-in-out infinite; animation-delay: var(--d); }
+  .m .ey { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; animation-delay: var(--d); }
+  @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.1px) } }
+  @keyframes glow { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1) } 96% { transform: scaleY(.12) } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important } .flow { display: none } }</style>
+<defs>
+    <linearGradient id="t" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B1C21"/><stop offset="1" stop-color="#0E0F11"/></linearGradient>
+    <radialGradient id="p" cx=".25" cy=".15" r=".9"><stop offset="0" stop-color="#D97757" stop-opacity=".28"/><stop offset="1" stop-color="#D97757" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect x=".5" y=".5" width="63" height="63" rx="16" fill="url(#t)"/>
+  <rect x=".5" y=".5" width="63" height="63" rx="16" fill="url(#p)"/>
+  <rect x=".5" y=".5" width="63" height="63" rx="16" fill="none" stroke="#fff" stroke-opacity=".1"/>
+  <g transform="translate(14 14) scale(1.5)" fill="none" stroke="#e39981" color="#e39981" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5a2 2 0 0 1 2-2h4.2l2 2h8.8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z"/><path d="M7 13.5h3"/></g>
+</svg>

@@ -1,0 +1,690 @@
+/* Flock — shared tokens. Palette and type scale follow Coucou's island
+   (MIT, github.com/Louis-CFM/coucou) so the two feel at home side by side. */
+
+:root {
+  color-scheme: dark;
+  --font: "Segoe UI Variable Text", "Segoe UI", system-ui, "Nirmala UI", "Microsoft YaHei UI", sans-serif;
+  --font-display: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+
+  --ink: #f5f6f8;
+  --ink-2: #e9ebee;
+  --dim: #9398a1;
+  --dim-2: #8e939c;
+  --dim-3: #6b7079;
+  --dim-4: #5f646d;
+  --card: #141518;
+  --card-flat: #0e0f11;
+  --tab-on: #1d1f23;
+  --hairline: rgba(255, 255, 255, 0.045);
+  --green: #22c55e;
+  --green-2: #34d399;
+  --amber: #f5a524;
+  --amber-text: #fbc06a;
+  --red: #f4505e;
+  --red-text: #ff8d97;
+  --claude: #d97757;
+  --spring: cubic-bezier(0.3, 1.2, 0.4, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: default;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ── Buttons ── */
+
+.btn {
+  font: 500 12.5px var(--font);
+  padding: 7px 13px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: transform 0.08s ease-out, background 0.12s ease-out, opacity 0.12s;
+}
+
+.btn:active {
+  transform: scale(0.94);
+}
+
+.btn.primary {
+  background: var(--ink);
+  color: #0b0c0e;
+}
+
+.btn.primary:hover {
+  background: #fff;
+}
+
+.btn.secondary {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--ink-2);
+}
+
+.btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.btn.danger {
+  background: rgba(244, 80, 94, 0.16);
+  color: var(--red-text);
+}
+
+.btn.danger:hover {
+  background: rgba(244, 80, 94, 0.24);
+}
+
+.btn.icon {
+  padding: 7px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.btn .kbd {
+  font-size: 10.5px;
+  padding: 0 4px;
+  border-radius: 4px;
+  opacity: 0.55;
+  border: 1px solid currentColor;
+}
+
+/* ── The mascot ── */
+
+.mascot-wrap {
+  display: inline-block;
+  line-height: 0;
+}
+
+.mascot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 100%;
+  transition: filter 0.8s ease;
+}
+
+/* Pivots in the drawing's own units (viewBox 40×40), so they stay put while
+   the parts inside move. */
+.mascot .bodyg,
+.mascot .eyes,
+.mascot .closed,
+.mascot .antenna,
+.mascot .tip,
+.mascot .glow,
+.mascot .ping,
+.mascot .shadow,
+.mascot .gaze,
+.mascot .look {
+  transform-box: view-box;
+}
+
+.mascot .bodyg {
+  transform-origin: 20px 36.2px; /* between its feet */
+}
+
+.mascot .eyes,
+.mascot .closed {
+  transform-origin: 20px 21.6px;
+}
+
+.mascot .antenna {
+  transform-origin: 26.6px 12.8px; /* the foot of the stalk */
+}
+
+.mascot .tip,
+.mascot .glow,
+.mascot .ping {
+  transform-origin: 29px 6.4px;
+}
+
+.mascot .shadow {
+  transform-origin: 20px 37px;
+}
+
+.mascot .closed,
+.mascot .glow,
+.mascot .ping {
+  opacity: 0;
+}
+
+.mascot .gaze {
+  transition: transform 0.5s ease;
+}
+
+.mascot .look {
+  transition: transform 0.18s ease-out;
+}
+
+/* Loops run at each mascot's own phase (--m-d, set when it is drawn). */
+
+/* Awake: breathes, its antenna sways a beat behind, blinks (sometimes twice). */
+.mascot.awake .eyes {
+  animation: m-blink 7.4s var(--m-d, 0s) infinite;
+}
+
+.mascot.awake .bodyg {
+  animation: m-idle 3.4s ease-in-out var(--m-d, 0s) infinite;
+}
+
+.mascot.awake .antenna {
+  animation: m-idle-sway 3.4s ease-in-out calc(var(--m-d, 0s) - 0.4s) infinite;
+}
+
+/* Asleep (window closed): eyes shut, antenna drooping, a slow breath, and the
+   antenna light glowing softly like a sleep light. */
+.mascot.asleep {
+  filter: saturate(0.6) brightness(0.74);
+}
+
+.mascot.asleep .eyes {
+  opacity: 0;
+}
+
+.mascot.asleep .closed {
+  opacity: 1;
+}
+
+.mascot.asleep .tip {
+  opacity: 0.35;
+  animation: m-sleep-light 4.4s ease-in-out var(--m-d, 0s) infinite;
+}
+
+.mascot.asleep .bodyg {
+  animation: m-breathe 4.4s ease-in-out var(--m-d, 0s) infinite;
+}
+
+.mascot.asleep .antenna {
+  animation: m-droop 4.4s ease-in-out var(--m-d, 0s) infinite;
+}
+
+/* Launching: walks on the spot, its antenna light blinking like it is loading. */
+.mascot.launching .bodyg {
+  animation: m-walk 0.42s ease-in-out infinite;
+}
+
+.mascot.launching .la {
+  animation: m-step 0.42s ease-in-out infinite;
+}
+
+.mascot.launching .lb {
+  animation: m-step 0.42s ease-in-out -0.21s infinite;
+}
+
+.mascot.launching .antenna {
+  animation: m-sway 0.42s ease-in-out infinite;
+}
+
+.mascot.launching .tip {
+  animation: m-load 0.84s steps(1, end) infinite;
+}
+
+.mascot.launching .glow {
+  animation: m-load-glow 0.84s ease-in-out infinite;
+}
+
+/* Alert (open, needs you): the antenna signals and sends out rings, and now
+   and then it bounces and looks up at it. */
+.mascot.alert .tip {
+  animation: m-signal 1.1s ease-in-out infinite;
+}
+
+.mascot.alert .glow {
+  animation: m-glow 1.1s ease-in-out infinite;
+}
+
+.mascot.alert .ping {
+  animation: m-ping 2.2s ease-out infinite;
+}
+
+.mascot.alert .antenna {
+  animation: m-sway 1.1s ease-in-out infinite;
+}
+
+.mascot.alert .eyes {
+  animation: m-blink 5.2s var(--m-d, 0s) infinite;
+}
+
+.mascot.alert .bodyg {
+  animation: m-nudge 3.3s ease-in-out infinite;
+}
+
+.mascot.alert .gaze {
+  animation: m-look-up 3.3s ease-in-out infinite;
+}
+
+/* Error (its last launch failed): slumped, heavy-lidded, looking at the floor,
+   its antenna light flickering like a failing bulb. */
+.mascot.error {
+  filter: saturate(0.45) brightness(0.78);
+}
+
+.mascot.error .eyes {
+  transform-origin: 20px 24.2px;
+  transform: scaleY(0.5);
+}
+
+.mascot.error .gaze {
+  transform: translateY(0.8px);
+}
+
+.mascot.error .tip {
+  opacity: 0.5;
+  animation: m-flicker 3.2s steps(1, end) var(--m-d, 0s) infinite;
+}
+
+.mascot.error .antenna {
+  transform: rotate(40deg);
+  animation: m-wilted 5s ease-in-out var(--m-d, 0s) infinite;
+}
+
+.mascot.error .bodyg {
+  animation: m-sigh 5s ease-in-out var(--m-d, 0s) infinite;
+}
+
+/* ── One-off moves (mascot.js adds .mv-<name> for its length) ── */
+
+/* Wake: eyes pop open, a stretch, the antenna springs up and lights. */
+.mascot.mv-wake .closed { animation: m-wake-lids 0.82s linear both; }
+.mascot.mv-wake .eyes { animation: m-wake-eyes 0.82s ease-out both; }
+.mascot.mv-wake .bodyg { animation: m-wake-body 0.82s ease-out both; }
+.mascot.mv-wake .antenna { animation: m-wake-antenna 0.82s ease-out both; }
+.mascot.mv-wake .tip { animation: m-wake-tip 0.82s ease-out both; }
+
+/* Doze: eyes grow heavy and close, it settles, the antenna droops and dims. */
+.mascot.mv-doze .eyes { animation: m-doze-eyes 1.25s ease-in-out both; }
+.mascot.mv-doze .closed { animation: m-doze-lids 1.25s linear both; }
+.mascot.mv-doze .bodyg { animation: m-doze-body 1.25s ease-in-out both; }
+.mascot.mv-doze .antenna { animation: m-doze-antenna 1.25s ease-in both; }
+.mascot.mv-doze .tip { animation: m-doze-tip 1.25s ease-in both; }
+
+/* Ready (its window opened, or it got signed in): a happy jump and a flash. */
+.mascot.mv-ready .bodyg { animation: m-ready 0.78s ease-out both; }
+.mascot.mv-ready .shadow { animation: m-shadow-hop 0.78s ease-out both; }
+.mascot.mv-ready .glow { animation: m-flash 0.78s ease-out both; }
+.mascot.mv-ready .tip { animation: m-pop 0.78s ease-out both; }
+.mascot.mv-ready .eyes { animation: m-happy 0.78s ease-out both; }
+
+/* Startle (it needs you): a jolt, eyes wide, the antenna snaps. */
+.mascot.mv-startle .bodyg { animation: m-startle 0.54s ease-out both; }
+.mascot.mv-startle .antenna { animation: m-snap 0.54s ease-out both; }
+.mascot.mv-startle .eyes { animation: m-wide 0.54s ease-out both; }
+
+/* Shudder (launch failed): a shake, the antenna wilts, the light fizzles. */
+.mascot.mv-shudder .bodyg { animation: m-shudder 0.64s linear both; }
+.mascot.mv-shudder .antenna { animation: m-wilt 0.64s ease-in both; }
+.mascot.mv-shudder .tip { animation: m-fizzle 0.64s steps(1, end) both; }
+
+/* Fidgets, now and then while awake. */
+.mascot.mv-glance .gaze { animation: m-glance 1.9s ease-in-out both; }
+.mascot.mv-twitch .antenna { animation: m-twitch 0.72s ease-out both; }
+.mascot.mv-twitch .tip { animation: m-pop 0.72s ease-out both; }
+.mascot.mv-blink2 .eyes { animation: m-blink2 0.56s linear both; }
+.mascot.mv-stretch .bodyg { animation: m-stretch 1.05s ease-in-out both; }
+.mascot.mv-stretch .eyes { animation: m-squeeze 1.05s ease-in-out both; }
+
+/* Pokes. */
+.mascot.mv-jump .bodyg { animation: m-jump 0.56s var(--spring) both; }
+.mascot.mv-jump .shadow { animation: m-shadow-hop 0.56s var(--spring) both; }
+.mascot.mv-squish .bodyg { animation: m-squish 0.62s ease-out both; }
+.mascot.mv-squish .eyes { animation: m-squish-eyes 0.62s ease-out both; }
+.mascot.mv-twirl .antenna { animation: m-twirl 0.9s cubic-bezier(0.5, 0, 0.3, 1) both; }
+.mascot.mv-twirl .glow { animation: m-flash 0.9s ease-out both; }
+.mascot.mv-twirl .bodyg { animation: m-bob 0.9s ease-in-out both; }
+
+/* Enter: a different account takes the stage. */
+.mascot.mv-enter { animation: m-enter 0.46s var(--spring) both; }
+
+/* ── Keyframes: loops ── */
+
+@keyframes m-blink {
+  0%, 39%, 41.6%, 88%, 90.4%, 92%, 94.4%, 100% { transform: scaleY(1); }
+  40.2%, 89.2%, 93.2% { transform: scaleY(0.1); }
+}
+
+@keyframes m-idle {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(-0.6px) scale(0.995, 1.012); }
+}
+
+@keyframes m-idle-sway {
+  0%, 100% { transform: rotate(1.5deg); }
+  50% { transform: rotate(-3.5deg); }
+}
+
+@keyframes m-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.025, 0.96); }
+}
+
+@keyframes m-droop {
+  0%, 100% { transform: rotate(36deg); }
+  50% { transform: rotate(31deg); }
+}
+
+@keyframes m-sleep-light {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes m-walk {
+  0%, 100% { transform: translateY(0) scale(1.02, 0.98); }
+  50% { transform: translateY(-1.3px) scale(0.98, 1.03); }
+}
+
+@keyframes m-step {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+}
+
+@keyframes m-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-12deg); }
+}
+
+@keyframes m-load {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@keyframes m-load-glow {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 0.15; }
+}
+
+@keyframes m-signal {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.8); }
+}
+
+@keyframes m-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes m-ping {
+  0% { opacity: 0.9; transform: scale(1); stroke-width: 0.9; }
+  70%, 100% { opacity: 0; transform: scale(3.2); stroke-width: 0.25; }
+}
+
+@keyframes m-nudge {
+  0%, 30%, 100% { transform: translateY(0) scale(1, 1); }
+  6% { transform: translateY(0) scale(1.04, 0.94); }
+  12% { transform: translateY(-2px) scale(0.97, 1.04); }
+  18% { transform: translateY(0) scale(1.02, 0.97); }
+  23% { transform: translateY(-0.7px) scale(1, 1.01); }
+}
+
+@keyframes m-look-up {
+  0%, 8%, 48%, 100% { transform: translate(0, 0); }
+  14%, 40% { transform: translate(0.7px, -1px); }
+}
+
+@keyframes m-flicker {
+  0%, 100% { opacity: 0.5; }
+  4% { opacity: 0.08; }
+  6% { opacity: 0.6; }
+  8% { opacity: 0.1; }
+  11% { opacity: 0.55; }
+  58% { opacity: 0.45; }
+  61% { opacity: 0.05; }
+  63% { opacity: 0.5; }
+}
+
+@keyframes m-wilted {
+  0%, 100% { transform: rotate(40deg); }
+  50% { transform: rotate(37deg); }
+}
+
+@keyframes m-sigh {
+  0%, 100% { transform: translateY(0.4px) scale(1.01, 0.97); }
+  50% { transform: translateY(0.4px) scale(1.03, 0.94); }
+}
+
+/* ── Keyframes: moves ── */
+
+@keyframes m-wake-lids {
+  0%, 28% { opacity: 1; }
+  30%, 100% { opacity: 0; }
+}
+
+@keyframes m-wake-eyes {
+  0%, 28% { opacity: 0; transform: scaleY(0.1); }
+  30% { opacity: 1; transform: scaleY(0.15); }
+  46% { transform: scaleY(1.2); }
+  62% { transform: scaleY(0.92); }
+  76%, 100% { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes m-wake-body {
+  0%, 30% { transform: translateY(0) scale(1.03, 0.95); }
+  55% { transform: translateY(-1.4px) scale(0.95, 1.08); }
+  76% { transform: translateY(0) scale(1.02, 0.98); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes m-wake-antenna {
+  0%, 30% { transform: rotate(34deg); }
+  60% { transform: rotate(-12deg); }
+  80% { transform: rotate(4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes m-wake-tip {
+  0%, 30% { opacity: 0.3; transform: scale(1); }
+  58% { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes m-doze-eyes {
+  0% { opacity: 1; transform: scaleY(1); }
+  22% { transform: scaleY(0.4); }
+  36% { transform: scaleY(0.75); }
+  60% { transform: scaleY(0.3); }
+  72% { transform: scaleY(0.5); }
+  86% { opacity: 1; transform: scaleY(0.08); }
+  88%, 100% { opacity: 0; transform: scaleY(0.08); }
+}
+
+@keyframes m-doze-lids {
+  0%, 86% { opacity: 0; }
+  88%, 100% { opacity: 1; }
+}
+
+@keyframes m-doze-body {
+  0% { transform: scale(1, 1); }
+  45% { transform: translateY(0.3px) scale(1.01, 0.98); }
+  75% { transform: scale(1.03, 0.94); }
+  100% { transform: scale(1, 1); }
+}
+
+@keyframes m-doze-antenna {
+  0% { transform: rotate(0deg); }
+  50% { transform: rotate(8deg); }
+  100% { transform: rotate(36deg); }
+}
+
+@keyframes m-doze-tip {
+  0% { opacity: 1; }
+  100% { opacity: 0.12; }
+}
+
+@keyframes m-ready {
+  0% { transform: translateY(0) scale(1, 1); }
+  14% { transform: translateY(0) scale(1.07, 0.9); }
+  40% { transform: translateY(-4.5px) scale(0.95, 1.06); }
+  62% { transform: translateY(0) scale(1.05, 0.93); }
+  78% { transform: translateY(0) scale(0.98, 1.02); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes m-shadow-hop {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  40% { opacity: 0.45; transform: scale(0.7); }
+}
+
+@keyframes m-flash {
+  0% { opacity: 0; transform: scale(1); }
+  30% { opacity: 1; transform: scale(1.7); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes m-pop {
+  0%, 100% { transform: scale(1); }
+  30% { transform: scale(1.4); }
+}
+
+@keyframes m-happy {
+  0%, 100% { transform: scaleY(1); }
+  30%, 62% { transform: scaleY(0.55); }
+}
+
+@keyframes m-startle {
+  0% { transform: translateY(0) scale(1, 1); }
+  20% { transform: translateY(-2.4px) scale(0.96, 1.06); }
+  45% { transform: translateY(0) scale(1.03, 0.96); }
+  70% { transform: translateY(0) scale(0.99, 1.01); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes m-snap {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-20deg); }
+  45% { transform: rotate(12deg); }
+  70% { transform: rotate(-6deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes m-wide {
+  0%, 100% { transform: scale(1, 1); }
+  18%, 50% { transform: scale(1.18, 1.22); }
+}
+
+@keyframes m-shudder {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-1.2px); }
+  22% { transform: translateX(1.1px); }
+  34% { transform: translateX(-0.9px); }
+  46% { transform: translateX(0.7px); }
+  58% { transform: translateX(-0.4px); }
+  70% { transform: translateX(0.2px); }
+}
+
+@keyframes m-wilt {
+  0% { transform: rotate(0deg); }
+  30% { transform: rotate(-14deg); }
+  100% { transform: rotate(40deg); }
+}
+
+@keyframes m-fizzle {
+  0% { opacity: 1; }
+  20% { opacity: 0.1; }
+  30% { opacity: 0.9; }
+  45% { opacity: 0.05; }
+  60% { opacity: 0.6; }
+  80%, 100% { opacity: 0.5; }
+}
+
+@keyframes m-glance {
+  0%, 100% { transform: translate(0, 0); }
+  12%, 40% { transform: translate(-1.7px, 0.2px); }
+  50%, 80% { transform: translate(1.7px, -0.2px); }
+  92% { transform: translate(0, 0); }
+}
+
+@keyframes m-twitch {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-16deg); }
+  35% { transform: rotate(10deg); }
+  55% { transform: rotate(-6deg); }
+  75% { transform: rotate(3deg); }
+}
+
+@keyframes m-blink2 {
+  0%, 30%, 65%, 100% { transform: scaleY(1); }
+  15%, 50% { transform: scaleY(0.1); }
+}
+
+@keyframes m-stretch {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  25% { transform: translateY(0) scale(1.05, 0.93); }
+  50%, 70% { transform: translateY(-0.6px) scale(0.95, 1.07); }
+  85% { transform: translateY(0) scale(1.02, 0.98); }
+}
+
+@keyframes m-squeeze {
+  0%, 35%, 80%, 100% { transform: scaleY(1); }
+  45%, 70% { transform: scaleY(0.3); }
+}
+
+@keyframes m-jump {
+  0% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(0) scale(1.06, 0.9); }
+  45% { transform: translateY(-5px) scale(0.96, 1.05); }
+  75% { transform: translateY(-2px); }
+  100% { transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes m-squish {
+  0%, 100% { transform: scale(1, 1); }
+  18% { transform: scale(1.14, 0.82); }
+  40% { transform: scale(0.92, 1.1); }
+  60% { transform: scale(1.05, 0.95); }
+  80% { transform: scale(0.99, 1.01); }
+}
+
+@keyframes m-squish-eyes {
+  0%, 45%, 100% { transform: scaleY(1); }
+  12%, 30% { transform: scaleY(0.15); }
+}
+
+@keyframes m-twirl {
+  0% { transform: rotate(0deg); }
+  85%, 100% { transform: rotate(-360deg); }
+}
+
+@keyframes m-bob {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(0.6px) scale(1.02, 0.97); }
+  70% { transform: translateY(-1.2px) scale(0.98, 1.02); }
+}
+
+@keyframes m-enter {
+  0% { opacity: 0; transform: translateY(6px) scale(0.84); }
+  60% { opacity: 1; transform: translateY(-1px) scale(1.03); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot,
+  .mascot .bodyg,
+  .mascot .antenna,
+  .mascot .tip,
+  .mascot .glow,
+  .mascot .ping,
+  .mascot .leg,
+  .mascot .eyes,
+  .mascot .closed,
+  .mascot .gaze,
+  .mascot .shadow {
+    animation: none !important;
+  }
+}

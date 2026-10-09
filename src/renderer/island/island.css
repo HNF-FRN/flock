@@ -1,0 +1,904 @@
+/* The island: a black shape hanging from the top edge of the screen.
+   Compact, it shows one little mascot per account and, while a Claude window
+   has focus, that account's name; hovered, it opens into the account
+   overview. Sizes and colours follow Coucou's island. */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+/* Design preview in a normal browser: fake a desktop behind the island. */
+html.preview body {
+  background:
+    radial-gradient(900px 500px at 20% 0%, #3b2f63 0%, transparent 60%),
+    radial-gradient(800px 600px at 90% 100%, #1d4a5c 0%, transparent 60%),
+    #23262d;
+}
+
+/* Invisible strip that wakes the island when it is tucked away. Windows only
+   hit-tests pixels that are not fully transparent, hence the 1% black. */
+#wake {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: 300px;
+  height: 6px;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+/* ── Island shell ───────────────────────────────────────────────────────── */
+
+#island {
+  --w: var(--cw, 150px);
+  --h: 30px;
+  --r: 14px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--w);
+  height: var(--h);
+  transform: translateX(-50%);
+  background: #000;
+  border-radius: 0 0 var(--r) var(--r);
+  transition:
+    width 0.46s var(--spring),
+    height 0.46s var(--spring),
+    border-radius 0.3s ease,
+    transform 0.34s var(--spring),
+    opacity 0.2s ease,
+    box-shadow 0.3s ease;
+  will-change: width, height;
+}
+
+#island.open {
+  --w: 760px;
+  --h: 270px;
+  --r: 30px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* "On hover" mode: tucked above the screen edge until the strip is touched.
+   Stepping aside: the same, while another app's window (a browser's tabs) lies
+   under the island; resting on the top edge brings it back. */
+#island.mode-hover:not(.open),
+#island.yield:not(.open) {
+  transform: translate(-50%, -100%);
+  opacity: 0;
+}
+
+/* Concave "ears" that join the island to the top edge, like a notch. */
+.ear {
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+
+.ear.l {
+  left: -11.5px;
+  background: radial-gradient(circle at 0 100%, transparent 11.5px, #000 12px);
+}
+
+.ear.r {
+  right: -11.5px;
+  background: radial-gradient(circle at 100% 100%, transparent 11.5px, #000 12px);
+}
+
+#clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* ── Compact ────────────────────────────────────────────────────────────── */
+
+#compact {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px 1px 10px;
+  transition: opacity 0.2s ease;
+}
+
+#island.open #compact {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#cLogo {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+}
+
+#cCount {
+  font: 600 11px var(--font);
+  color: var(--green-2);
+  min-width: 0;
+}
+
+/* The account whose Claude window has focus. */
+#cCount.focus {
+  flex: none; /* its natural width, which the island then grows to fit */
+  font: 600 11.5px var(--font);
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.25s ease;
+}
+
+/* …and a thin line in its colour along the island's lower edge, like the
+   accent edge along that window's top. */
+#island::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--focus, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, background-color 0.25s ease;
+}
+
+#island.focused:not(.open)::after {
+  opacity: 0.9;
+}
+
+#cMinis {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+#cMinis .mini {
+  width: 16px;
+  height: 16px;
+}
+
+#cMinis .more {
+  font: 600 10px var(--font);
+  color: var(--dim-3);
+  margin-left: 3px;
+}
+
+/* ── Expanded ───────────────────────────────────────────────────────────── */
+
+#full {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 760px;
+  height: 270px;
+  transform: translateX(-50%);
+  padding: 4px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease-in;
+}
+
+#island.open #full {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.26s ease-out 0.12s;
+}
+
+#header {
+  height: 32px;
+  flex: 0 0 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px 0 14px;
+}
+
+#headStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font: 500 11.5px var(--font);
+  color: var(--dim-3);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+#headStatus b {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+#headStatus .wait {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--amber-text);
+}
+
+#headStatus .wait::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.hbtn {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--dim-2);
+  transition: background 0.15s, color 0.15s, transform 0.08s;
+}
+
+.hbtn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.hbtn:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.hbtn:active {
+  transform: scale(0.92);
+}
+
+.btn.tiny {
+  padding: 4px 11px;
+  font-size: 11.5px;
+  margin-right: 4px;
+}
+
+#full button:focus-visible {
+  outline: 1.5px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 1px;
+}
+
+#body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 184px 1fr;
+  gap: 8px;
+}
+
+/* ── Account list (left) ────────────────────────────────────────────────── */
+
+.accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding: 2px 0;
+}
+
+.accounts::-webkit-scrollbar {
+  display: none;
+}
+
+.acct {
+  --c: #d97757;
+  position: relative;
+  flex: 0 0 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 10px 0 9px;
+  border-radius: 10px;
+  font: 500 12.5px var(--font);
+  color: #b9bdc5;
+  text-align: left;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.acct:hover {
+  background: rgba(255, 255, 255, 0.045);
+}
+
+/* Crossing rows on the way to the detail: they stay dark, since they won't show. */
+.accounts.passing .acct:hover:not(.cur) {
+  background: transparent;
+}
+
+.accounts.passing .acct:hover .num {
+  opacity: 0;
+}
+
+.acct:active {
+  transform: scale(0.985);
+}
+
+.acct .mini {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+}
+
+.acct .name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.acct.off .name {
+  color: var(--dim-2);
+}
+
+/* The account shown on the right: lit, with a thin bar in its colour. */
+.acct.cur {
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.acct.cur .name {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.acct .bar {
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--c);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: opacity 0.2s, transform 0.25s var(--spring);
+}
+
+.acct.cur .bar {
+  opacity: 1;
+  transform: none;
+}
+
+/* Ctrl+click: picked for "Open N". */
+.acct.sel {
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, transparent);
+}
+
+.acct .num {
+  flex: 0 0 auto;
+  font: 500 10px var(--mono);
+  color: var(--dim-3);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.acct:hover .num {
+  opacity: 1;
+}
+
+.acct .dot {
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.acct .dot.on {
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.14);
+}
+
+.acct .dot.wait {
+  background: var(--amber);
+  box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.16);
+}
+
+.acct .dot.launch {
+  background: var(--ink);
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.acct.add {
+  gap: 8px;
+  padding-left: 13px;
+  color: var(--dim-3);
+}
+
+.acct.add svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  margin-right: 4px;
+}
+
+.acct.add:hover {
+  color: var(--ink-2);
+}
+
+/* ── Detail (right) ─────────────────────────────────────────────────────── */
+
+.detail {
+  --c: #d97757;
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 152px minmax(0, 1fr);
+  gap: 14px;
+  padding: 6px 14px 6px 6px;
+  border-radius: 20px;
+  background: #0e0f11;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  overflow: hidden;
+}
+
+/* ── The stage: the account's mascot, large, in a pool of its colour ── */
+
+.stage {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 0;
+  padding: 10px 8px 6px;
+  border-radius: 15px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.01));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+/* The account's colour washing up from the floor. */
+.stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(140px 120px at 50% 100%, color-mix(in srgb, var(--c) 16%, transparent), transparent 75%);
+  transition: opacity 0.6s ease;
+}
+
+.d-mascot {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+}
+
+.d-mascot .mascot-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+/* A halo behind the mascot and a pool of light at its feet. */
+.d-mascot::before {
+  content: "";
+  position: absolute;
+  inset: -34px -30px -18px;
+  z-index: -1;
+  background:
+    radial-gradient(44px 9px at 50% 79%, color-mix(in srgb, var(--c) 55%, transparent), transparent 100%),
+    radial-gradient(70px 64px at 50% 48%, color-mix(in srgb, var(--c) 30%, transparent), transparent 100%);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+/* The light follows the mascot's state: dim while it sleeps, pulsing while it opens or needs you. */
+.detail[data-state="asleep"] .d-mascot::before,
+.detail[data-state="error"] .d-mascot::before {
+  opacity: 0.32;
+}
+
+.detail[data-state="asleep"] .stage::before,
+.detail[data-state="error"] .stage::before {
+  opacity: 0.4;
+}
+
+.detail[data-state="launching"] .d-mascot::before {
+  animation: stage-pulse 0.84s ease-in-out infinite;
+}
+
+.detail[data-state="alert"] .d-mascot::before {
+  animation: stage-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes stage-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Each time the island opens, the mascot rises onto the stage. */
+#island.open .d-mascot {
+  animation: stage-rise 0.55s var(--spring) 0.1s both;
+}
+
+@keyframes stage-rise {
+  0% { opacity: 0; transform: translateY(10px) scale(0.88); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* What the mascot is doing, in words. */
+.d-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  font: 500 11px var(--font);
+  color: var(--dim-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.d-state span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.d-state::before {
+  content: "";
+  flex: 0 0 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.d-state.ok {
+  color: var(--green-2);
+}
+
+.d-state.warn {
+  color: var(--amber-text);
+}
+
+.d-state.err {
+  color: var(--red-text);
+}
+
+.d-state.busy::before {
+  animation: pulse 0.9s ease-in-out infinite;
+}
+
+/* ── Beside the stage: name, actions, sessions ── */
+
+.d-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+}
+
+.d-head {
+  position: relative;
+  height: 40px;
+  flex: 0 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.d-who {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.d-name {
+  font: 600 17px var(--font-display);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.d-sub {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 500 11.5px var(--font);
+  color: var(--dim-3);
+  white-space: nowrap;
+}
+
+.d-sub:empty {
+  display: none;
+}
+
+.d-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.d-actions .btn {
+  padding: 6px 11px;
+  font-size: 12px;
+}
+
+.d-actions .btn.icon {
+  padding: 6px;
+}
+
+.d-actions .btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.d-actions .btn.secondary:not(.icon) svg {
+  margin: 0 -2px 0 -3px;
+}
+
+.d-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.d-facts {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 6px;
+}
+
+.d-facts:empty {
+  display: none;
+}
+
+.fact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12px var(--font);
+  color: var(--dim);
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.fact svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  color: var(--dim-3);
+}
+
+.fact span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.fact.mono span {
+  font: 400 11.5px var(--mono);
+}
+
+.fact.warn,
+.fact.warn svg {
+  color: var(--amber-text);
+}
+
+/* Recent Code sessions: title, folder, how long ago. */
+.sessions {
+  display: none;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0 -6px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.detail.peek .sessions {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.session {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 22px;
+  height: 22px;
+  padding: 0 6px 0 8px;
+  border-radius: 7px;
+  font: 500 12px var(--font);
+  color: var(--ink-2);
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.session:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.session .t {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session .f,
+.session .m {
+  flex: 0 0 auto;
+  font: 500 11px var(--font);
+  color: var(--dim-3);
+  white-space: nowrap;
+}
+
+.session .f {
+  max-width: 108px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session .m {
+  min-width: 46px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A session open in a window of its own: a click brings that window forward. */
+.session .m.w {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--c);
+}
+
+.session .m.w svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* What a click does, on hover: show its own window, or open it in the account's. */
+.session .go {
+  display: none;
+  flex: 0 0 auto;
+  font: 600 11px var(--font);
+  color: var(--ink-2);
+}
+
+.session.win .go {
+  color: var(--c);
+}
+
+.session:hover .go {
+  display: block;
+}
+
+/* "New session in this folder", on hover */
+.session .here {
+  display: none;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 5px;
+  color: var(--dim-2);
+}
+
+.session .here svg {
+  width: 11px;
+  height: 11px;
+}
+
+.session:hover .here {
+  display: grid;
+}
+
+.session:hover .m {
+  display: none;
+}
+
+.session .here:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--ink);
+}
+
+.sessions .empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  padding-bottom: 8px;
+}
+
+.sessions .empty b {
+  font: 600 12.5px var(--font);
+  color: var(--ink-2);
+}
+
+.sessions .empty span {
+  font: 400 11.5px var(--font);
+  color: var(--dim-3);
+}
+
+/* ── Toast ──────────────────────────────────────────────────────────────── */
+
+#toast {
+  --ty: 40px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  max-width: 560px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: #000;
+  color: var(--ink-2);
+  font: 500 12px var(--font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translate(-50%, calc(var(--ty) - 12px));
+  transition: opacity 0.2s ease, transform 0.4s var(--spring);
+  pointer-events: none;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, var(--ty));
+}
+
+#toast.ok {
+  color: #86efac;
+}
+
+#toast.warn {
+  color: var(--amber-text);
+}
+
+#toast.err {
+  color: var(--red-text);
+}

@@ -1,0 +1,299 @@
+/* The keyboard build and the finale. */
+
+/* ── Keys ───────────────────────────────────────────────────────────────── */
+
+.keys-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1100px 620px at 50% 62%, rgba(255, 255, 255, 0.05), transparent 70%),
+    radial-gradient(900px 400px at 50% 0%, rgba(120, 110, 200, 0.08), transparent 70%),
+    #060708;
+}
+
+.keys-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 52%;
+}
+
+.key-row {
+  position: absolute;
+  left: 50%;
+  top: 640px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.key-row.gap {
+  gap: 104px;
+}
+
+.key-plus {
+  font: 500 46px var(--font-display);
+  color: #6b7079;
+}
+
+.key-wrap {
+  position: relative;
+}
+
+.key-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.key-label {
+  position: absolute;
+  left: 50%;
+  top: 812px;
+  transform: translateX(-50%);
+  font: 600 50px var(--font-display);
+  letter-spacing: -0.022em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.keys-island {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 800px;
+  height: 330px;
+  transform-origin: 50% 0;
+}
+
+.keys-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Finale ─────────────────────────────────────────────────────────────── */
+
+.fin-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1400px 700px at 50% 108%, rgba(120, 110, 220, 0.16), transparent 70%),
+    radial-gradient(1000px 520px at 50% 40%, rgba(255, 255, 255, 0.05), transparent 70%),
+    #060708;
+}
+
+.fin-crane {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 70%;
+}
+
+.fin-back {
+  position: absolute;
+  inset: 0;
+  perspective: 2000px;
+  perspective-origin: 50% 40%;
+  transform-style: preserve-3d;
+}
+
+.fin-win {
+  left: 0;
+  top: 0;
+  transform-origin: 50% 50%;
+}
+
+.fin-win .aw-edge-line {
+  border-top-width: 4px;
+}
+
+.fin-win .aw-edge {
+  filter: drop-shadow(0 0 10px var(--c)) drop-shadow(0 0 24px color-mix(in srgb, var(--c) 60%, transparent));
+}
+
+.fin-spots {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(420px 760px at 50% -8%, rgba(255, 255, 255, 0.12), transparent 70%),
+    radial-gradient(300px 640px at 22% -10%, rgba(56, 189, 248, 0.09), transparent 70%),
+    radial-gradient(300px 640px at 78% -10%, rgba(250, 204, 21, 0.08), transparent 70%);
+  mix-blend-mode: screen;
+}
+
+.fin-sweep {
+  position: absolute;
+  left: 0;
+  top: -100px;
+  width: 520px;
+  height: 1280px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.fin-island {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 800px;
+  height: 330px;
+  transform-origin: 50% 0;
+}
+
+.fin-lock {
+  position: absolute;
+  left: 50%;
+  top: 405px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  z-index: 4;
+}
+
+.fin-leader {
+  width: 150px;
+  height: 150px;
+}
+
+.fin-leader .mascot-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+.fin-word {
+  font: 700 196px/1 var(--font-display);
+  letter-spacing: -0.055em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.fin-line {
+  position: absolute;
+  left: 50%;
+  top: 528px;
+  transform: translateX(-50%);
+  font-size: 46px;
+  letter-spacing: -0.02em;
+  color: #b9bdc5;
+  white-space: nowrap;
+  z-index: 4;
+}
+
+.fin-flock {
+  position: absolute;
+  left: 50%;
+  top: 676px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 58px;
+  z-index: 4;
+}
+
+.fin-slot {
+  position: relative;
+  width: 112px;
+  height: 112px;
+}
+
+.fin-slot .mascot-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.fin-pool {
+  --c: #fff;
+  position: absolute;
+  left: -64px;
+  right: -64px;
+  bottom: -30px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--c) 50%, transparent), transparent);
+  filter: blur(8px);
+}
+
+.fin-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fin-dust i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.fin-foot {
+  position: absolute;
+  left: 50%;
+  top: 902px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font: 500 26px var(--font);
+  color: #c9ccd2;
+  white-space: nowrap;
+  z-index: 6;
+}
+
+.fin-foot i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #6b7079;
+}
+
+.fin-legal {
+  position: absolute;
+  left: 50%;
+  top: 986px;
+  transform: translateX(-50%);
+  font: 400 18px var(--font);
+  color: #6b7079;
+  white-space: nowrap;
+  z-index: 6;
+}
+
+.fin-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: #fff;
+  pointer-events: none;
+}
+
+.fin-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.keys-stage .keycap-3d {
+  min-width: 168px;
+  height: 168px;
+  border-radius: 32px;
+  font-size: 64px;
+}
+
+.keys-stage .keycap-3d.wide {
+  min-width: 250px;
+  font-size: 52px;
+}

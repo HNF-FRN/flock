@@ -1,0 +1,461 @@
+/* Second desktop act: the settings window frame, fake inputs, the sign-in
+   screen, a generic mail window, the travelling link and a generic browser. */
+
+/* ── Settings window (Flock's own CSS inside; frame and fake inputs are the film's) ── */
+
+.setwin {
+  position: absolute;
+  width: 640px;
+  height: 800px;
+  min-height: 0 !important;
+  border-radius: 8px;
+  overflow: hidden;
+  transform: translateZ(0);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 40px 100px rgba(0, 0, 0, 0.55), 0 12px 30px rgba(0, 0, 0, 0.35);
+  z-index: 15;
+}
+
+.setwin .titlebar {
+  position: relative;
+  padding-right: 0;
+}
+
+.sw-ctrls {
+  margin-left: auto;
+  display: flex;
+  height: 100%;
+}
+
+.sw-ctrls i {
+  width: 46px;
+  display: grid;
+  place-items: center;
+  font: 400 11px var(--font);
+  font-style: normal;
+  color: #9398a1;
+}
+
+.setwin .backdrop,
+.setwin .sheet {
+  animation: none !important;
+}
+
+.setwin #fMode {
+  position: relative;
+}
+
+.seg-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.setwin #fMode button {
+  position: relative;
+  z-index: 1;
+}
+
+.setwin #fMode button.lit {
+  color: #0b0c0e;
+}
+
+.fake-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  font: 400 12.5px var(--font);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--hair);
+  border-radius: 9px;
+  color: var(--ink);
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.fake-input.focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.fi-ph {
+  color: var(--dim-4);
+}
+
+.fi-caret {
+  width: 1px;
+  height: 15px;
+  margin: 0 1px;
+  background: var(--ink);
+}
+
+.fake-check {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border-radius: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.45);
+}
+
+.fake-check.on {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.fake-check.on::after {
+  content: "";
+  position: absolute;
+  left: 3.5px;
+  top: 0.5px;
+  width: 4px;
+  height: 8px;
+  border: solid #0b0c0e;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ── A new account's first window: sign in ──────────────────────────────── */
+
+.sx-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: #17181b;
+  display: grid;
+  place-items: center;
+}
+
+.sx-step {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 340px;
+}
+
+.sx-title {
+  font: 600 30px var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.sx-sub {
+  font: 400 14px var(--font);
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+
+.sx-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 11px;
+  background: #222429;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font: 500 14px var(--font);
+  color: #e9ebee;
+}
+
+.sx-btn.fx-hover {
+  background: #2a2c32;
+}
+
+.sx-g {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 2px solid #c9ccd2;
+}
+
+.sx-e svg {
+  display: block;
+}
+
+.sx-mail {
+  color: #e9ebee;
+  margin-bottom: 4px;
+}
+
+/* ── Mail (generic) ─────────────────────────────────────────────────────── */
+
+.mailwin {
+  position: absolute;
+  left: 70px;
+  top: 300px;
+  width: 820px;
+  height: 520px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #16171a;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 40px 100px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  z-index: 5;
+}
+
+.mw-bar {
+  height: 34px;
+  flex: 0 0 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 14px;
+  background: #111214;
+  font: 400 12.5px var(--font);
+  color: #d4d7dd;
+}
+
+.mw-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.mw-list {
+  width: 260px;
+  flex: 0 0 260px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #131416;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mw-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font: 400 12px var(--font);
+  color: #8d929b;
+}
+
+.mw-item b {
+  font: 600 12.5px var(--font);
+  color: #e9ebee;
+}
+
+.mw-item.on {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.mw-read {
+  flex: 1 1 auto;
+  padding: 26px 30px;
+  font: 400 14px/1.6 var(--font);
+  color: #c9ccd2;
+}
+
+.mw-subject {
+  font: 600 22px var(--font-display);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.mw-from {
+  font: 400 12.5px var(--font);
+  color: #8d929b;
+  margin-bottom: 20px;
+}
+
+.mw-read p {
+  margin: 0;
+}
+
+.mw-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 11px 24px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #0b0c0e;
+  font: 600 14px var(--font);
+}
+
+.mw-btn.fx-hover {
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.12);
+}
+
+.link-pill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px 9px 12px;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.16);
+  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.6), 0 0 26px rgba(250, 204, 21, 0.35);
+  backdrop-filter: blur(10px);
+  font: 600 15px var(--font);
+  color: #fde68a;
+  white-space: nowrap;
+}
+
+.link-pill svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.link-trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 79;
+  overflow: visible;
+}
+
+.link-trail path {
+  fill: none;
+  stroke: rgba(250, 204, 21, 0.55);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Browser (generic, maximised) ───────────────────────────────────────── */
+
+.browser {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1032px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: #141518;
+}
+
+.bw-tabs {
+  height: 40px;
+  flex: 0 0 40px;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0 12px;
+  background: #0f1012;
+}
+
+.bw-tab {
+  width: 236px;
+  height: 32px;
+  box-sizing: border-box;
+  border-radius: 9px 9px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  font: 400 12.5px var(--font);
+  color: #9ca1aa;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.bw-tab i {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.bw-tab.on {
+  background: #1b1c20;
+  color: #eceef1;
+}
+
+.bw-plus {
+  margin-left: 10px;
+  align-self: center;
+  font: 400 18px var(--font);
+  color: #9ca1aa;
+}
+
+.bw-bar {
+  height: 46px;
+  flex: 0 0 46px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  background: #1b1c20;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.bw-nav {
+  font: 400 14px var(--font);
+  color: #8d929b;
+  letter-spacing: 0.2em;
+}
+
+.bw-url {
+  flex: 0 1 760px;
+  height: 30px;
+  border-radius: 999px;
+  background: #111214;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font: 400 13px var(--font);
+  color: #c9ccd2;
+}
+
+.bw-page {
+  flex: 1 1 auto;
+  padding: 80px 260px;
+  color: #c9ccd2;
+}
+
+.bw-page h1 {
+  margin: 0 0 10px;
+  font: 600 46px var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.bw-page p {
+  margin: 0 0 40px;
+  font: 400 18px var(--font);
+  color: #8d929b;
+}
+
+.bw-line {
+  height: 14px;
+  border-radius: 7px;
+  margin-bottom: 22px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.bw-chart {
+  height: 220px;
+  width: 760px;
+  display: flex;
+  align-items: flex-end;
+  gap: 26px;
+  padding: 0 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bw-chart i {
+  flex: 1;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(rgba(148, 163, 184, 0.55), rgba(148, 163, 184, 0.12));
+}

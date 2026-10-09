@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>Flock</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="island.css">
+</head>
+<body>
+  <div id="wake"></div>
+
+  <div id="island" class="mode-compact">
+    <i class="ear l"></i><i class="ear r"></i>
+    <div id="clip">
+      <div id="compact" data-calm>
+        <span id="cLogo"></span>
+        <span id="cCount"></span>
+        <span id="cMinis"></span>
+      </div>
+
+      <div id="full">
+        <header id="header">
+          <div id="headStatus"></div>
+          <div class="header-actions">
+            <button class="btn primary tiny hidden" id="openSel"></button>
+            <button class="hbtn" id="openAll" title="Open every account (A)"></button>
+            <button class="hbtn" id="gear" title="Settings"></button>
+            <button class="hbtn" id="snd" title="Sounds"></button>
+          </div>
+        </header>
+
+        <div id="body">
+          <nav class="accounts" id="accounts" aria-label="Accounts"></nav>
+
+          <section class="detail" id="detail">
+            <div class="stage">
+              <span class="d-mascot" id="dMascot"></span>
+              <span class="d-state" id="dState"></span>
+            </div>
+            <div class="d-main">
+              <div class="d-head">
+                <div class="d-who">
+                  <b class="d-name" id="dName"></b>
+                  <span class="d-sub" id="dSub"></span>
+                </div>
+                <div class="d-actions" id="dActions"></div>
+              </div>
+              <div class="d-body">
+                <div class="d-facts" id="dFacts"></div>
+                <div class="sessions" id="dSessions"></div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="../shared/icons.js"></script>
+  <script src="../shared/mascot.js"></script>
+  <script src="../shared/sound.js"></script>
+  <script src="../shared/preview-mock.js"></script>
+  <script src="island.js"></script>
+</body>
+</html>

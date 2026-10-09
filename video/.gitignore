@@ -1,0 +1,5 @@
+node_modules/
+out/
+
+# Mixkit audio: its licence allows it inside the film, not as loose files. See README.
+public/audio/

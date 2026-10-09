@@ -1,0 +1,141 @@
+'use strict';
+// An account's recent Claude Code sessions, for the island's session peek.
+// Claude Desktop keeps one small JSON file per Code session in the account's
+// data folder: claude-code-sessions/<account uuid>/<organization uuid>/
+// local_<id>.json, with the title its sidebar shows, the folder, and when it
+// was last active. Flock only reads them, and only the signed-in account's: a
+// data folder can still hold the sessions of an account that signed in there
+// before. Each file is parsed again only when it changes, and all of it is
+// asynchronous: an account can have hundreds of sessions.
+//
+// A session can also be open in a window of its own (Claude's "Open in → New
+// window"). Claude lists those in session-popouts.json in the data folder,
+// within a second of one opening or closing, to bring them back at its next
+// start; so while the account's window runs, that file says which are open.
+
+const fs = require('fs');
+const path = require('path');
+const claude = require('./claude');
+
+const ID_RE = /^local_[A-Za-z0-9-]{1,64}$/;
+const FILE_RE = /^local_[A-Za-z0-9-]{1,64}\.json$/; // removed sessions are renamed deleted_*
+const POPOUTS_FILE = 'session-popouts.json';
+const cache = new Map(); // file -> { mtime, session }
+const popoutCache = new Map(); // file -> { mtime, list }
+
+async function entries(dir, dirs) {
+  try {
+    return (await fs.promises.readdir(dir, { withFileTypes: true }))
+      .filter((e) => (dirs ? e.isDirectory() : e.isFile()))
+      .map((e) => e.name);
+  } catch {
+    return [];
+  }
+}
+
+/** The folders holding this account's sessions: whichever level is named after the signed-in account. */
+async function folders(profile) {
+  const dataDir = claude.existingDataDir(claude.dataDirOf(profile));
+  const { accountId } = claude.readAccount(claude.dataDirOf(profile));
+  if (!dataDir || !accountId) return [];
+  const root = path.join(dataDir, 'claude-code-sessions');
+  const out = [];
+  for (const a of await entries(root, true)) {
+    for (const b of await entries(path.join(root, a), true)) {
+      if (a === accountId || b === accountId) out.push(path.join(root, a, b));
+    }
+  }
+  return out;
+}
+
+async function load(file) {
+  let mtime;
+  try { mtime = (await fs.promises.stat(file)).mtimeMs; } catch { return null; }
+  const hit = cache.get(file);
+  if (hit && hit.mtime === mtime) return hit.session;
+  let session = null;
+  try {
+    const j = JSON.parse(await fs.promises.readFile(file, 'utf8'));
+    if (ID_RE.test(j.sessionId || '')) {
+      session = {
+        id: j.sessionId,
+        title: typeof j.title === 'string' && j.title.trim() ? j.title.trim() : null,
+        cwd: typeof j.cwd === 'string' ? j.cwd : null,
+        at: Number(j.lastActivityAt || j.createdAt) || 0,
+        archived: Boolean(j.isArchived),
+      };
+    }
+  } catch {}
+  cache.set(file, { mtime, session });
+  return session;
+}
+
+/**
+ * Newest first, archived ones left out: [{ id, title, cwd, folder, at }]. The
+ * sessions in `keep` are always listed, first, within `limit`.
+ */
+async function recent(profile, limit = 6, keep = []) {
+  const files = [];
+  for (const dir of await folders(profile)) {
+    for (const name of await entries(dir, false)) {
+      if (FILE_RE.test(name)) files.push(path.join(dir, name));
+    }
+  }
+  const all = (await Promise.all(files.map(load))).filter(Boolean);
+  all.sort((x, y) => y.at - x.at);
+  const kept = new Set(keep);
+  const first = all.filter((s) => kept.has(s.id));
+  const rest = all.filter((s) => !kept.has(s.id) && !s.archived);
+  return [...first, ...rest].slice(0, Math.max(limit, first.length)).map((s) => ({
+    id: s.id,
+    title: s.title,
+    cwd: s.cwd,
+    folder: s.cwd ? path.basename(s.cwd) : null,
+    at: s.at,
+  }));
+}
+
+function bounds(b) {
+  const ok = b && ['x', 'y', 'width', 'height'].every((k) => Number.isFinite(b[k])) && b.width > 0 && b.height > 0;
+  return ok ? { x: b.x, y: b.y, width: b.width, height: b.height } : null;
+}
+
+/**
+ * The sessions Claude has in windows of their own: [{ id, title, bounds }],
+ * bounds in DIP as Claude last saw them. Only meaningful while the account's
+ * window runs: Claude keeps the list after it quits, to restore them.
+ */
+async function popouts(profile) {
+  const dataDir = claude.existingDataDir(claude.dataDirOf(profile));
+  if (!dataDir) return [];
+  const file = path.join(dataDir, POPOUTS_FILE);
+  let mtime;
+  try { mtime = (await fs.promises.stat(file)).mtimeMs; } catch { return []; } // none open: Claude removes it
+  const hit = popoutCache.get(file);
+  if (hit && hit.mtime === mtime) return hit.list;
+  let list = [];
+  try {
+    const j = JSON.parse(await fs.promises.readFile(file, 'utf8'));
+    list = (Array.isArray(j.popouts) ? j.popouts : [])
+      .filter((p) => p && ID_RE.test(String(p.sessionId || '')))
+      .map((p) => ({
+        id: p.sessionId,
+        title: typeof p.title === 'string' && p.title.trim() ? p.title.trim() : null,
+        bounds: bounds(p.bounds),
+      }));
+  } catch {}
+  popoutCache.set(file, { mtime, list });
+  return list;
+}
+
+/** One of the account's sessions by id, or null. */
+async function find(profile, id) {
+  if (!ID_RE.test(String(id || ''))) return null;
+  for (const dir of await folders(profile)) {
+    const s = await load(path.join(dir, `${id}.json`));
+    if (s) return s;
+  }
+  return null;
+}
+
+module.exports = { ID_RE, recent, find, popouts };

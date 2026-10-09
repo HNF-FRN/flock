@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="76" viewBox="0 0 360 76" role="img" aria-label="Download Flock for Windows">
+<title>Download Flock for Windows</title>
+<style>
+  .m .bd { animation: bob 3.4s ease-in-out infinite; animation-delay: var(--d); }
+  .m .gl { animation: glow 2.6s ease-in-out infinite; animation-delay: var(--d); }
+  .m .ey { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; animation-delay: var(--d); }
+  @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.1px) } }
+  @keyframes glow { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1) } 96% { transform: scaleY(.12) } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important } .flow { display: none } }</style>
+<defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1C1D22"/><stop offset="1" stop-color="#0E0F11"/></linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#D97757"/><stop offset="0.25" stop-color="#38BDF8"/><stop offset="0.5" stop-color="#4ADE80"/><stop offset="0.75" stop-color="#C084FC"/><stop offset="1" stop-color="#FACC15"/></linearGradient>
+  </defs>
+  <rect x="1" y="1" width="358" height="74" rx="37" fill="url(#bg)" stroke="url(#rim)" stroke-opacity=".7" stroke-width="1.5"/>
+  <circle cx="38" cy="38" r="22" fill="#F5F6F8"/>
+  <path d="M38 27v17M31 37.5l7 7 7-7M30 49h16" fill="none" stroke="#0E0F11" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="74" y="35" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="21" font-weight="650" fill="#F5F6F8">Download for Windows</text>
+  <text x="74" y="56" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#9398A1">Free · open source · MIT</text>
+</svg>

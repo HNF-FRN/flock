@@ -1,0 +1,138 @@
+/* Review pass: captions on a glass plate, larger kickers, one-line callouts,
+   the dwell ring, a softer finale. Loaded last. */
+
+/* ── Captions: a dark glass plate behind kicker + headline ──────────────── */
+
+.caption {
+  left: 88px;
+  bottom: 80px;
+  padding: 22px 30px 24px;
+}
+
+.cap-plate {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 22px;
+  background: rgba(9, 10, 12, 0.74);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.075), 0 24px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(22px) saturate(1.25);
+  transform-origin: 0 100%;
+}
+
+.caption {
+  isolation: isolate;
+}
+
+.cap-kicker {
+  font-size: 20px;
+  letter-spacing: 0.14em;
+  margin-bottom: 12px;
+  color: #b4b9c2;
+}
+
+.cap-dot {
+  width: 9px;
+  height: 9px;
+}
+
+.cap-title {
+  font-size: 52px;
+}
+
+.cap-scrim {
+  background: radial-gradient(1100px 520px at 0% 100%, rgba(4, 5, 7, 0.55), rgba(4, 5, 7, 0.25) 42%, rgba(4, 5, 7, 0) 72%);
+}
+
+/* ── One-line callouts (title · sub on one row) ─────────────────────────── */
+
+.callout-label.inline {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 18px 13px;
+  border-radius: 14px;
+}
+
+.callout-label.inline b {
+  font-size: 26px;
+}
+
+.callout-label.inline span {
+  font-size: 19px;
+}
+
+/* ── Pointer dwell ring + hint ──────────────────────────────────────────── */
+
+.pointer-dwell {
+  position: absolute;
+  left: -24px;
+  top: -24px;
+  width: 48px;
+  height: 48px;
+  opacity: 0;
+}
+
+.pointer-dwell svg {
+  display: block;
+  transform: rotate(-90deg);
+}
+
+.pointer-dwell circle {
+  fill: none;
+  stroke-width: 3;
+}
+
+.pointer-dwell .track {
+  stroke: rgba(255, 255, 255, 0.18);
+}
+
+.pointer-dwell .fill {
+  stroke: #f5f6f8;
+  stroke-linecap: round;
+  stroke-dasharray: 119.4 119.4;
+  stroke-dashoffset: calc(119.4px * (1 - var(--fill, 0)));
+}
+
+.pointer-dwell-label {
+  position: absolute;
+  left: 44px;
+  top: 30px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: rgba(9, 10, 12, 0.86);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  font: 500 16px var(--font);
+  color: var(--ink);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* ── Session rows: row-embed seam ───────────────────────────────────────── */
+
+.row-seam {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--c, #f5f6f8);
+  box-shadow: 0 0 6px var(--c, #f5f6f8);
+  transform: scaleX(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Finale: a readable footer and legal line ───────────────────────────── */
+
+.fin-legal {
+  top: 980px;
+  font-size: 20px;
+  color: #9097a1;
+}
+
+.fin-foot {
+  top: 896px;
+  font-size: 27px;
+}

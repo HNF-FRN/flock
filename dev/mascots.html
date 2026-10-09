@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Flock mascots</title>
+  <link rel="stylesheet" href="../src/renderer/shared/tokens.css">
+  <style>
+    body { background: #141518; padding: 24px; font: 12px var(--font); color: var(--dim); display: grid; gap: 22px; }
+    .row { display: flex; gap: 22px; align-items: end; flex-wrap: wrap; }
+    .light { background: #f3f3f3; padding: 14px; border-radius: 12px; }
+    .black { background: #000; padding: 14px; border-radius: 12px; }
+    .cell { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .big .mascot-wrap { width: 150px; height: 150px; }
+    .mid .mascot-wrap { width: 64px; height: 64px; }
+    .small .mascot-wrap { width: 25px; height: 25px; }
+    .tiny .mascot-wrap { width: 16px; height: 16px; }
+    .player { display: flex; gap: 28px; align-items: center; background: #0e0f11; padding: 18px 22px; border-radius: 16px; }
+    .player .mascot-wrap { width: 160px; height: 160px; }
+    .controls { display: grid; gap: 10px; }
+    .controls div { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .controls b { width: 64px; color: var(--dim-3); font-weight: 500; }
+    .controls button { padding: 5px 10px; border-radius: 8px; background: rgba(255, 255, 255, 0.07); color: var(--ink-2); font: 500 12px var(--font); }
+    .controls button:hover { background: rgba(255, 255, 255, 0.13); }
+    .controls button.on { background: var(--ink); color: #000; }
+  </style>
+</head>
+<body>
+  <div class="player">
+    <span id="stage"></span>
+    <div class="controls">
+      <div id="states"><b>State</b></div>
+      <div id="fidgets"><b>Fidget</b></div>
+      <div id="pokes"><b>Poke</b></div>
+    </div>
+  </div>
+  <div class="row big" id="big"></div>
+  <div class="row mid" id="mid"></div>
+  <div class="row small black" id="small"></div>
+  <div class="row tiny black" id="tiny"></div>
+  <div class="row mid light" id="light"></div>
+  <script src="../src/renderer/shared/mascot.js"></script>
+  <script>
+    const B = FlockMascot;
+    const P = ['#D97757', '#FACC15', '#F4505E', '#E879F9', '#C084FC', '#818CF8', '#38BDF8', '#2DD4BF', '#4ADE80', '#F5F6F8'];
+    const STATES = ['awake', 'asleep', 'launching', 'alert', 'error'];
+
+    // One mascot to drive by hand: a state change plays its move.
+    const star = B.create('#38BDF8', 'awake', { shadow: true });
+    document.getElementById('stage').appendChild(star);
+    star.addEventListener('click', () => B.poke(star));
+    const button = (box, label, fn) => {
+      const b = document.createElement('button');
+      b.textContent = label;
+      b.addEventListener('click', () => fn(b));
+      document.getElementById(box).appendChild(b);
+      return b;
+    };
+    const stateBtns = STATES.map((s) => button('states', s, (b) => {
+      B.setState(star, s);
+      stateBtns.forEach((x) => x.classList.toggle('on', x === b));
+    }));
+    stateBtns[0].classList.add('on');
+    ['glance', 'twitch', 'blink2', 'stretch'].forEach((m) => button('fidgets', m, () => B.play(star, m)));
+    ['jump', 'squish', 'twirl', 'enter'].forEach((m) => button('pokes', m, () => B.play(star, m)));
+
+    STATES.forEach((s, i) => {
+      const c = document.createElement('div'); c.className = 'cell';
+      c.appendChild(B.create(P[i * 2], s, { shadow: true }));
+      c.appendChild(document.createTextNode(s));
+      document.getElementById('big').appendChild(c);
+    });
+    for (const id of ['mid', 'small', 'tiny', 'light']) {
+      P.forEach((p, i) => {
+        const c = document.createElement('div'); c.className = 'cell';
+        c.appendChild(B.create(p, STATES[i % STATES.length]));
+        document.getElementById(id).appendChild(c);
+      });
+    }
+  </script>
+</body>
+</html>

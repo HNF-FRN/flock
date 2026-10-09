@@ -1,0 +1,8 @@
+﻿node_modules/
+dist/
+*.log
+
+.dev-data/
+
+# Local Claude Code / preview config
+.claude/

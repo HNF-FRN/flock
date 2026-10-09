@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <title>Flock</title>
+  <link rel="stylesheet" href="../shared/tokens.css">
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="titlebar">
+    <span class="brand"><span id="brandMascot"></span><b>Flock</b><span class="version" id="version"></span></span>
+  </div>
+
+  <main id="root">
+    <section class="welcome hidden" id="welcome">
+      <div class="trio" id="trio"></div>
+      <div class="welcome-text">
+        <h1>One Claude per account, side by side</h1>
+        <p>Add each of your other Claude accounts once and sign in once in its window. After that every account is a click away: from the island at the top of your screen, the tray, or right here.</p>
+        <button class="btn primary" id="welcomeAdd">Add your first account</button>
+      </div>
+    </section>
+
+    <section id="accounts">
+      <h2>Accounts <span class="count" id="acctCount"></span><span class="spacer"></span>
+        <button class="btn secondary small" id="openAllBtn">Open all</button>
+        <button class="btn primary small" id="addBtn">Add account</button>
+      </h2>
+      <div class="acct-list" id="acctList"></div>
+      <p class="hint">Each account opens its own Claude window with its own sign-in, chats and connectors. Drag to reorder — the order is the island's 1–9 shortcuts.</p>
+    </section>
+
+    <section id="startup">
+      <h2>When Flock starts</h2>
+      <div class="row">
+        <span class="grow">Start Flock with Windows</span>
+        <button class="switch" data-setting="launchAtLogin" aria-label="Start Flock with Windows"></button>
+      </div>
+      <p class="hint dev-only hidden" id="loginDevNote">Applies to the installed Flock (a development run cannot register itself).</p>
+      <div class="row top">
+        <span class="grow">Open these accounts automatically</span>
+      </div>
+      <div class="chips" id="autoChips"></div>
+      <div class="row">
+        <span class="grow">Gap between windows when opening several</span>
+        <select id="stagger">
+          <option value="0">None</option>
+          <option value="600">0.6 s</option>
+          <option value="1200">1.2 s</option>
+          <option value="2500">2.5 s</option>
+          <option value="4000">4 s</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="islandSec">
+      <h2>Island</h2>
+      <div class="row">
+        <span class="grow">Show the island at the top of the screen</span>
+        <div class="seg" id="islandMode">
+          <button data-v="compact">Always</button>
+          <button data-v="hover">On hover</button>
+          <button data-v="off">Off</button>
+        </div>
+      </div>
+      <div class="row">
+        <span class="grow">Step aside when another app's window is under it</span>
+        <button class="switch" data-setting="islandYield" aria-label="Step aside for other apps"></button>
+      </div>
+      <p class="hint">A maximized browser's tabs, an editor's toolbar: the island slides away and lets every click through. Rest the pointer on the top edge, or press the shortcut, to bring it back.</p>
+      <div class="row">
+        <span class="grow">Shortcut to open it</span>
+        <span class="tag warn hidden" id="hotkeyWarn">Taken by another app</span>
+        <button class="keycap" id="hotkey"></button>
+      </div>
+      <div class="row">
+        <span class="grow">Sounds</span>
+        <button class="switch" data-setting="sound" aria-label="Sounds"></button>
+      </div>
+    </section>
+
+    <section id="windowsSec">
+      <h2>Claude windows</h2>
+      <div class="row">
+        <span class="grow">Name each window after its account</span>
+        <button class="switch" data-setting="windowNames" aria-label="Name each window after its account"></button>
+      </div>
+      <p class="hint">“Work — Claude” in Alt+Tab, Win+Tab and taskbar previews, Claude’s icon in the account’s colour there, and a taskbar button per account. Windows keeps these on the window itself; Flock gives each window its own name and icon back when you switch this off or quit.</p>
+      <div class="row">
+        <span class="grow">Accent edge along the top of each window</span>
+        <div class="seg" id="windowEdge">
+          <button data-v="all">Every window</button>
+          <button data-v="focus">Focused only</button>
+          <button data-v="off">Off</button>
+        </div>
+      </div>
+      <p class="hint">A slim line in the account’s colour above Claude’s title-bar controls; the window you’re typing in glows. It never covers Claude’s content, takes no clicks, and is left out of screenshots and screen sharing.</p>
+      <div class="row">
+        <span class="grow">Show the focused account on the island</span>
+        <button class="switch" data-setting="islandFocus" aria-label="Show the focused account on the island"></button>
+      </div>
+    </section>
+
+    <section id="signinSec">
+      <h2>Signing in</h2>
+      <p class="hint">Each new account signs in once, in its own window, and stays signed in.</p>
+      <ul class="tips">
+        <li><b>E-mail</b> — choose <i>Continue with email</i>, then click the sign-in button in the e-mail. While an account waits for sign-in, Flock sends that link to its window and keeps it away from Main.</li>
+        <li><b>Google</b> — works too. Windows hands the browser's sign-in to Main; Flock passes it on to the waiting account's window (Main ignores a sign-in it didn't start).</li>
+        <li>If Main ever shows a “Use verification code” page, ignore it — never click <i>Sign in here instead</i> there, or Main switches to that account.</li>
+        <li><b>Connectors</b> in an extra account (Drive, GitHub…): right-click it in the island → <i>Pass the next claude:// link here</i>, then connect.</li>
+      </ul>
+      <div class="row">
+        <span class="grow">Pass Google sign-in on to the account that is waiting</span>
+        <button class="switch" data-setting="autoRouteSignIn" aria-label="Pass Google sign-in on"></button>
+      </div>
+    </section>
+
+    <section id="claudeSec">
+      <h2>Claude Desktop</h2>
+      <div class="row" id="claudeRow"></div>
+      <p class="hint">Flock starts Claude with <code>--user-data-dir</code> for each account's own window and sign-in, and sets <code>CLAUDE_CONFIG_DIR</code> for accounts that don't share <code>~\.claude</code>. Flock is not made by Anthropic.</p>
+    </section>
+
+    <footer>
+      <span>Flock <span id="version2"></span> · visual language after <span class="link" id="coucouLink">Coucou</span> (MIT)</span>
+      <span class="spacer"></span>
+      <button class="btn secondary small" id="quitApp">Quit Flock</button>
+    </footer>
+  </main>
+
+  <div class="backdrop hidden" id="sheetWrap">
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true">
+      <div class="sheet-head">
+        <span class="sheet-mascot" id="sheetMascot"></span>
+        <h3 id="sheetTitle">Add account</h3>
+      </div>
+
+      <div class="field">
+        <label for="fName">Name</label>
+        <input type="text" id="fName" maxlength="40" placeholder="Work, Personal, Client…" autocomplete="off">
+      </div>
+      <div class="field">
+        <label for="fNote">Note</label>
+        <input type="text" id="fNote" maxlength="40" placeholder="Optional — e.g. the e-mail you'll sign in with" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Colour</label>
+        <div class="swatches" id="fColors"></div>
+      </div>
+
+      <div class="field col">
+        <label>~/.claude for the Code tab</label>
+        <div class="seg wide" id="fMode">
+          <button data-mode="shared">Shared</button>
+          <button data-mode="own">Its own</button>
+          <button data-mode="link">Same as…</button>
+        </div>
+        <div class="mode-detail" data-for="shared">
+          <p class="hint">Uses <code>~\.claude</code> like your other shared accounts: same CLAUDE.md, skills, plugins, settings and memory.</p>
+        </div>
+        <div class="mode-detail" data-for="own">
+          <div class="pathrow"><code id="fOwnDir"></code><button class="btn secondary small" id="fOwnPick">Change…</button></div>
+          <label class="check"><input type="checkbox" id="fSeedBasics" checked> Start with a copy of my <span id="basicsList">CLAUDE.md and settings.json</span></label>
+          <label class="check"><input type="checkbox" id="fSeedSkills"> Copy my skills too <span class="dimtxt" id="skillsSize"></span></label>
+          <p class="hint">History, projects and plugins are not copied — this account starts clean and keeps its own memory.</p>
+        </div>
+        <div class="mode-detail" data-for="link">
+          <select id="fLink"></select>
+          <p class="hint" id="fLinkHint">Shares that account's own ~/.claude folder.</p>
+        </div>
+      </div>
+
+      <div class="field toggle">
+        <label for="fOpenOnStart">Open automatically when Flock starts</label>
+        <button class="switch" id="fOpenOnStart" aria-label="Open automatically when Flock starts"></button>
+      </div>
+
+      <details class="adv" id="fAdv">
+        <summary>Data folder</summary>
+        <div class="pathrow"><code id="fDataDir"></code><button class="btn secondary small" id="fDataPick">Change…</button></div>
+        <p class="hint">Where this account's Claude keeps its sign-in and chats. Pick an existing folder to reuse an earlier setup.</p>
+      </details>
+
+      <div class="notice warn hidden" id="fNotice"></div>
+
+      <div class="sheet-foot">
+        <button class="btn danger" id="fRemove">Remove…</button>
+        <span class="spacer"></span>
+        <button class="btn secondary" id="fCancel">Cancel</button>
+        <button class="btn primary" id="fSave">Add &amp; sign in</button>
+      </div>
+
+      <div class="confirm hidden" id="confirm">
+        <p id="confirmText"></p>
+        <div class="confirm-btns">
+          <button class="btn secondary" id="cKeep">Remove, keep its data</button>
+          <button class="btn danger" id="cTrash">Remove and recycle its data</button>
+          <button class="btn secondary" id="cBack">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="../shared/icons.js"></script>
+  <script src="../shared/mascot.js"></script>
+  <script src="../shared/sound.js"></script>
+  <script src="../shared/preview-mock.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

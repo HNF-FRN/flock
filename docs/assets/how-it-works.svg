@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="564" viewBox="0 0 1280 564" role="img" aria-label="How Flock works: one Claude install, one data folder and one named window per account">
+<title>How Flock works: one Claude install, one data folder and one named window per account</title>
+<style>
+  .m .bd { animation: bob 3.4s ease-in-out infinite; animation-delay: var(--d); }
+  .m .gl { animation: glow 2.6s ease-in-out infinite; animation-delay: var(--d); }
+  .m .ey { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; animation-delay: var(--d); }
+  @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.1px) } }
+  @keyframes glow { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1) } 96% { transform: scaleY(.12) } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important } .flow { display: none } }</style>
+<defs>
+    <radialGradient id="pP" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(204.8 28.200000000000003) scale(640 620.4000000000001)"><stop offset="0" stop-color="#3B2F63" stop-opacity=".85"/><stop offset="1" stop-color="#3B2F63" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pT" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1152 564) scale(640 620.4000000000001)"><stop offset="0" stop-color="#1D4A5C" stop-opacity=".8"/><stop offset="1" stop-color="#1D4A5C" stop-opacity="0"/></radialGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#fff" fill-opacity=".045"/></pattern>
+    <clipPath id="card"><rect width="1280" height="564" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="1280" height="564" fill="#08090B"/>
+    <rect width="1280" height="564" fill="url(#pP)"/>
+    <rect width="1280" height="564" fill="url(#pT)"/>
+    <rect width="1280" height="564" fill="url(#dots)"/>
+  </g>
+  <rect x=".5" y=".5" width="1279" height="563" rx="27.5" fill="none" stroke="#fff" stroke-opacity=".07"/>
+  <defs><filter id="soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="6"/></filter></defs>
+  <text x="760" y="62" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">EACH ACCOUNT, ITS OWN WINDOW</text>
+  <text x="44" y="62" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">HOW FLOCK OPENS AN ACCOUNT</text>
+  <path d="M344 314 C 514 314, 570 156, 760 156" fill="none" stroke="#D97757" stroke-opacity=".55" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#D97757"><animateMotion dur="2.6s" begin="0s" repeatCount="indefinite" path="M344 314 C 514 314, 570 156, 760 156"/></circle>
+  <rect x="467.9" y="204" width="168.20000000000002" height="30" rx="15" fill="#000" stroke="#D97757" stroke-opacity=".5"/>
+  <text x="552" y="224" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">claude-desktop.exe</text>
+<path d="M344 314 C 514 314, 570 306, 760 306" fill="none" stroke="#38BDF8" stroke-opacity=".55" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#38BDF8"><animateMotion dur="2.6s" begin="-0.8s" repeatCount="indefinite" path="M344 314 C 514 314, 570 306, 760 306"/></circle>
+  <rect x="424.45" y="273" width="255.10000000000002" height="30" rx="15" fill="#000" stroke="#38BDF8" stroke-opacity=".5"/>
+  <text x="552" y="293" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">--user-data-dir=…\Claude-Work</text>
+<path d="M344 314 C 514 314, 570 456, 760 456" fill="none" stroke="#4ADE80" stroke-opacity=".55" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#4ADE80"><animateMotion dur="2.6s" begin="-1.6s" repeatCount="indefinite" path="M344 314 C 514 314, 570 456, 760 456"/></circle>
+  <rect x="412.6" y="386" width="278.8" height="30" rx="15" fill="#000" stroke="#4ADE80" stroke-opacity=".5"/>
+  <text x="552" y="406" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">--user-data-dir=…\Claude-ClientA</text>
+  <rect x="44" y="196" width="300" height="236" rx="20" fill="#0E0F11" fill-opacity=".92" stroke="#fff" stroke-opacity=".09"/>
+  <rect x="94" y="222" width="200" height="52" rx="26" fill="#000" stroke="#fff" stroke-opacity=".09"/>
+  <g class="m " transform="translate(112 228) scale(0.8)" style="--d:0s">
+  <defs>
+    <linearGradient id="m7b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#df8d72"/><stop offset="1" stop-color="#c36b4e"/></linearGradient>
+    <radialGradient id="m7h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m7g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0c9bc" stop-opacity=".9"/><stop offset="1" stop-color="#f0c9bc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m7s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#6d3c2c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#6d3c2c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#6d3c2c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m7g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#f0c9bc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m7b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m7h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+<g class="m " transform="translate(156 228) scale(0.8)" style="--d:-1.1s">
+  <defs>
+    <linearGradient id="m8b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58c8f9"/><stop offset="1" stop-color="#32aadf"/></linearGradient>
+    <radialGradient id="m8h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m8g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#afe5fc" stop-opacity=".9"/><stop offset="1" stop-color="#afe5fc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m8s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#1c5f7c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m8g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#afe5fc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m8b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m8h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+<g class="m " transform="translate(200 228) scale(0.8)" style="--d:-2.2s">
+  <defs>
+    <linearGradient id="m9b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67e394"/><stop offset="1" stop-color="#43c873"/></linearGradient>
+    <radialGradient id="m9h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m9g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#b7f2cc" stop-opacity=".9"/><stop offset="1" stop-color="#b7f2cc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m9s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#256f40"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#256f40"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#256f40" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m9g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#b7f2cc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m9b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m9h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+  <text x="194" y="320" text-anchor="middle" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="30" font-weight="650" fill="#F5F6F8">Flock</text>
+  <text x="194" y="350" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#9398A1">starts one Claude window per account</text>
+  <text x="194" y="372" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#9398A1">and names and colours it</text>
+  <text x="194" y="408" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#6B7079">one install, many data folders</text>
+  <g>
+    
+    <rect x="760" y="92" width="476" height="128" rx="12" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="774" y="92" width="448" height="2.5" rx="1.25" fill="#D97757" opacity="0.75"/>
+    <text x="778" y="123" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Main — Claude</text>
+    <g stroke="#6B7079" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <path d="M1159 118h9"/>
+      <rect x="1184" y="113.5" width="9" height="9" rx="1.5"/>
+      <path d="M1209 113.5l9 9M1218 113.5l-9 9"/>
+    </g>
+    <path d="M760 138h476" stroke="#fff" stroke-opacity=".06"/>
+    <text x="778" y="170" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="1" fill="#6B7079">DATA</text>
+    <text x="888" y="170" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="14" fill="#F5F6F8">%APPDATA%\Claude</text>
+    <text x="778" y="196" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="1" fill="#6B7079">~/.CLAUDE</text>
+    <text x="888" y="196" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="14" fill="#F5F6F8">~\.claude<tspan fill="#6B7079">  (shared)</tspan></text>
+  </g>
+<g>
+    <rect x="774" y="239" width="448" height="6" rx="3" fill="#38BDF8" opacity=".55" filter="url(#soft)"/>
+    <rect x="760" y="242" width="476" height="128" rx="12" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="774" y="242" width="448" height="2.5" rx="1.25" fill="#38BDF8" opacity="1"/>
+    <text x="778" y="273" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Work — Claude</text>
+    <g stroke="#6B7079" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <path d="M1159 268h9"/>
+      <rect x="1184" y="263.5" width="9" height="9" rx="1.5"/>
+      <path d="M1209 263.5l9 9M1218 263.5l-9 9"/>
+    </g>
+    <path d="M760 288h476" stroke="#fff" stroke-opacity=".06"/>
+    <text x="778" y="320" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="1" fill="#6B7079">DATA</text>
+    <text x="888" y="320" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="14" fill="#F5F6F8">%APPDATA%\Claude-Work</text>
+    <text x="778" y="346" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="1" fill="#6B7079">~/.CLAUDE</text>
+    <text x="888" y="346" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="14" fill="#F5F6F8">~\.claude<tspan fill="#6B7079">  (shared)</tspan></text>
+  </g>
+<g>
+    
+    <rect x="760" y="392" width="476" height="128" rx="12" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="774" y="392" width="448" height="2.5" rx="1.25" fill="#4ADE80" opacity="0.75"/>
+    <text x="778" y="423" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Client A — Claude</text>
+    <g stroke="#6B7079" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <path d="M1159 418h9"/>
+      <rect x="1184" y="413.5" width="9" height="9" rx="1.5"/>
+      <path d="M1209 413.5l9 9M1218 413.5l-9 9"/>
+    </g>
+    <path d="M760 438h476" stroke="#fff" stroke-opacity=".06"/>
+    <text x="778" y="470" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="1" fill="#6B7079">DATA</text>
+    <text x="888" y="470" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="14" fill="#F5F6F8">%APPDATA%\Claude-ClientA</text>
+    <text x="778" y="496" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="1" fill="#6B7079">~/.CLAUDE</text>
+    <text x="888" y="496" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="14" fill="#F5F6F8">~\.claude-clienta<tspan fill="#6B7079">  (its own)</tspan></text>
+  </g>
+</svg>

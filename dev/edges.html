@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Flock accent edges</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #3a3f4b; font: 12px "Segoe UI", system-ui, sans-serif; color: #ddd; display: grid; grid-template-columns: repeat(2, 460px); gap: 18px 24px; }
+    .win { position: relative; height: 70px; border-radius: 8px; overflow: hidden; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35); }
+    .win.dark { background: #151515; border-top: 1px solid #353535; }
+    .win.light { background: #f7f6f2; border-top: 1px solid #d9d7d0; }
+    .bar { position: absolute; inset: 8px 12px auto; height: 20px; display: flex; gap: 10px; align-items: center; }
+    .bar i { display: block; height: 14px; border-radius: 4px; background: currentColor; opacity: 0.55; }
+    .dark .bar { color: #cfcfcf; }
+    .light .bar { color: #3d3d3a; }
+    .bar .chip { width: 140px; opacity: 0.25; }
+    .bar .sp { flex: 1; background: none; }
+    iframe { position: absolute; left: 0; top: 0; width: 100%; height: 7px; border: 0; background: transparent; }
+    label { grid-column: span 2; color: #aaa; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <script>
+    // The real edge page (src/renderer/edge) over mock Claude title bars: dark and
+    // light, focused and not, in the account colours. Served by the flock-ui preview.
+    const colors = ['#D97757', '#38BDF8', '#E879F9', '#FACC15', '#4ADE80', '#F5F6F8'];
+    for (const c of colors) {
+      const l = document.createElement('label');
+      l.textContent = c;
+      document.body.appendChild(l);
+      for (const theme of ['dark', 'light']) {
+        for (const focused of [true, false]) {
+          const w = document.createElement('div');
+          w.className = `win ${theme}`;
+          w.title = `${theme}, ${focused ? 'focused' : 'not focused'}`;
+          w.innerHTML = '<div class="bar"><i style="width:14px"></i><i style="width:14px"></i><i class="chip"></i><i class="sp"></i><i style="width:14px"></i><i style="width:14px"></i></div>';
+          const f = document.createElement('iframe');
+          f.src = `../src/renderer/edge/index.html?edge=${encodeURIComponent(JSON.stringify({ color: c, focused }))}`;
+          w.appendChild(f);
+          document.body.appendChild(w);
+        }
+      }
+    }
+  </script>
+</body>
+</html>

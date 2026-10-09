@@ -1,0 +1,69 @@
+/* Preview player chrome (not part of the film; hidden when captured). */
+
+html.preview body {
+  background: #0b0b0d;
+  height: 100vh;
+}
+
+html.preview #film {
+  position: absolute;
+  top: 0;
+}
+
+#pv-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: #121316;
+  border-top: 1px solid #23252a;
+  font: 500 12px "Cascadia Mono", Consolas, monospace;
+  color: #c8cbd1;
+  z-index: 10;
+}
+
+#pv-bar button {
+  font: inherit;
+  color: inherit;
+  background: #1f2126;
+  border: 1px solid #2c2f35;
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#pv-time {
+  min-width: 120px;
+}
+
+#pv-scrub {
+  position: relative;
+  flex: 1;
+  height: 16px;
+  border-radius: 8px;
+  background: #1d1f24;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+#pv-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #38bdf8, #c084fc);
+  opacity: 0.55;
+}
+
+#pv-marks i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
