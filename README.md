@@ -9,11 +9,7 @@
   <img src="https://img.shields.io/badge/built%20with-Claude%20Code-D97757?style=flat-square&labelColor=0E0F11" alt="Built with Claude Code">
 </p>
 
-<p align="center">
-  <a href="docs/media/flock.mp4"><img src="docs/media/preview.webp" width="100%" alt="Flock's island opening one Claude account, then all of them side by side"></a>
-  <br>
-  <sub>▶ <a href="docs/media/flock.mp4">Watch the full film</a> (1:35, with sound)</sub>
-</p>
+https://github.com/user-attachments/assets/90dac482-ff69-4043-b519-5b57860b855c
 
 <p align="center">
   <a href="https://github.com/HNF-FRN/flock/releases/latest"><img src="docs/assets/download.svg" height="64" alt="Download Flock for Windows"></a>
@@ -24,6 +20,10 @@ Claude Desktop lets you sign in to one account at a time. If you have a few (per
 **Flock** runs each account in its own Claude window, side by side, each signed in once and remembered. Every window is named after its account and wears its colour, so you always know which one you're typing into. A small island at the top of the screen holds one mascot per account: click one to open or bring up that account's window.
 
 ## What it does
+
+<p align="center">
+  <img src="docs/media/preview.webp" width="100%" alt="Flock's island opening one Claude account, then all of them side by side">
+</p>
 
 <table>
   <tr>
