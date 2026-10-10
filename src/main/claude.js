@@ -124,6 +124,34 @@ function readAccount(dataDir) {
   return info;
 }
 
+const usageCache = new Map(); // plan-usage-history.json path -> { mtime, usage }
+
+/**
+ * The account's latest plan usage, as Claude samples it about every 15 minutes
+ * while the window runs: { fh, sd, t } with the 5-hour and weekly use in
+ * percent (either can be missing) and when it was sampled; null when unknown.
+ */
+function readUsage(dataDir) {
+  const dir = existingDataDir(dataDir);
+  if (!dir) return null;
+  const file = path.join(dir, 'plan-usage-history.json');
+  let mtime;
+  try { mtime = fs.statSync(file).mtimeMs; } catch { return null; }
+  const hit = usageCache.get(file);
+  if (hit && hit.mtime === mtime) return hit.usage;
+  let usage = null;
+  try {
+    const samples = JSON.parse(fs.readFileSync(file, 'utf8')).samples;
+    const last = Array.isArray(samples) ? samples[samples.length - 1] : null;
+    if (last && last.u && Number.isFinite(last.t)) {
+      const pct = (v) => (Number.isFinite(v) ? Math.max(0, Math.min(100, v)) : null);
+      usage = { fh: pct(last.u.fh), sd: pct(last.u.sd), t: last.t };
+    }
+  } catch {}
+  usageCache.set(file, { mtime, usage });
+  return usage;
+}
+
 // ── Config dir (~/.claude) ──────────────────────────────────────────────────
 
 /** The CLAUDE_CONFIG_DIR an account runs with, or null for the shared ~/.claude. */
@@ -323,7 +351,10 @@ module.exports = {
   allDirsOf,
   existingDataDir,
   readAccount,
+  readUsage,
   configDirOf,
+  SESSION_VAR_RE,
+  NEVER_PASS_RE,
   launch,
   instances,
   appIcon,

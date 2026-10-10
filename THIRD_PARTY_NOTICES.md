@@ -25,3 +25,5 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+The pairing QR code in Flock's settings is drawn with [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), used under the MIT License (Copyright (c) 2009 Kazuhiko Arase; the license text is the same as above). "QR Code" is a registered trademark of DENSO WAVE INCORPORATED.

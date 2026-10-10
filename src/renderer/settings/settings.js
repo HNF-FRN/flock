@@ -543,6 +543,205 @@
   $('cKeep').addEventListener('click', () => remove(false));
   $('cTrash').addEventListener('click', () => remove(true));
 
+  // ── Phone ─────────────────────────────────────────────────────────────────
+
+  let phone = null;
+  let pairTick = 0;
+  let signingInAt = 0; // when a Claude Code sign-in window was last opened
+
+  function ago(t) {
+    if (!t) return 'never';
+    const m = Math.round((Date.now() - t) / 60000);
+    if (m < 1) return 'just now';
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `${h} h ago`;
+    return `${Math.round(h / 24)} d ago`;
+  }
+
+  async function loadPhone(fresh) {
+    try {
+      phone = await api.phone.view({ fresh: Boolean(fresh) });
+    } catch {
+      return;
+    }
+    renderPhone();
+  }
+
+  function signInLine(a) {
+    const c = a.cli || {};
+    if (c.ok) return [`Ready · ${c.email || 'signed in'}`, 'ok', null];
+    switch (c.problem) {
+      case 'signed-out': return ['Not signed in', 'warn', 'Sign in…'];
+      case 'other-account': return [`Signed in to another account: ${c.email || '?'}`, 'err', 'Sign in again…'];
+      case 'not-claude-ai': return ['Uses an API key, not a claude.ai sign-in', 'warn', 'Sign in…'];
+      case 'unsupported': return ['Give it its own ~/.claude to use it from your phone', '', null];
+      case 'no-cli': return ['Claude Code isn’t installed', 'err', null];
+      default: return ['Checking…', '', null];
+    }
+  }
+
+  function serverLine(s) {
+    if (s.status === 'asking') return ['Waiting for your answer on the phone', 'warn'];
+    if (s.status === 'starting') return ['Starting…', 'warn'];
+    if (s.status === 'ready') {
+      const n = s.sessions.length;
+      return [n ? `Running · ${n} session${n > 1 ? 's' : ''}` : 'Running', 'ok'];
+    }
+    if (s.status === 'failed') return [s.error || 'Stopped with an error', 'err'];
+    return ['Stopped', ''];
+  }
+
+  function renderPhone() {
+    if (!phone) return;
+    const on = phone.enabled;
+    $('phoneOn').classList.toggle('on', on);
+    $('phoneBody').classList.toggle('hidden', !on);
+    if (!on) return;
+
+    // Pairing code
+    const p = phone.pairing;
+    $('pairCard').classList.toggle('hidden', !p);
+    $('pairBtn').textContent = phone.devices.length ? 'Pair another phone' : 'Pair a phone';
+    $('pairBtn').classList.toggle('hidden', Boolean(p));
+    clearInterval(pairTick);
+    if (p) {
+      if ($('pairQr').dataset.url !== p.url) {
+        $('pairQr').innerHTML = p.svg; // generated in Flock's main process from the pairing link
+        $('pairQr').dataset.url = p.url;
+      }
+      const tick = () => {
+        const s = Math.max(0, Math.round((p.until - Date.now()) / 1000));
+        $('pairUntil').textContent = `The code works for ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} more.`;
+      };
+      tick();
+      pairTick = setInterval(tick, 1000);
+    }
+
+    // Paired phones
+    const devs = $('phoneDevices');
+    devs.innerHTML = phone.devices.length ? '' : '<p class="hint">No phone yet. Pair one, then open the Flock app on it.</p>';
+    for (const d of phone.devices) {
+      const r = document.createElement('div');
+      r.className = 'pline';
+      r.innerHTML = `<span class="picon">${I.phone || ''}</span><div class="pmain"><b></b><span class="psub"></span></div><button class="btn secondary small">Remove</button>`;
+      r.querySelector('b').textContent = d.name;
+      r.querySelector('.psub').textContent = `Paired ${ago(d.pairedAt)} · last used ${ago(d.seenAt)}`;
+      r.querySelector('button').addEventListener('click', () => api.phone.unpair(d.id));
+      devs.appendChild(r);
+    }
+
+    // Each account's Claude Code sign-in
+    const accts = $('phoneAccts');
+    accts.innerHTML = '';
+    if (!phone.cliFound) {
+      accts.innerHTML = '<div class="notice warn">Claude Code (the CLI) isn’t installed on this PC, and phone sessions run in it. Install it from claude.com/claude-code.</div>';
+    }
+    for (const a of phone.accounts) {
+      const [text, tone, action] = signInLine(a);
+      const r = document.createElement('div');
+      r.className = 'pline';
+      r.style.setProperty('--c', a.color);
+      r.innerHTML = `<span class="pavatar"></span><div class="pmain"><b></b><span class="psub"></span></div>`;
+      r.querySelector('.pavatar').appendChild(B.create(a.color, a.cli && a.cli.ok ? 'awake' : 'asleep'));
+      r.querySelector('b').textContent = a.name;
+      const sub = r.querySelector('.psub');
+      sub.textContent = text;
+      sub.className = `psub ${tone}`;
+      if (action) {
+        const b = document.createElement('button');
+        b.className = 'btn secondary small';
+        b.textContent = action;
+        b.addEventListener('click', async () => {
+          try {
+            await api.phone.signIn(a.id);
+            signingInAt = Date.now();
+            toast(`Sign ${a.name} in, in the window that opened, then come back`, 'info');
+          } catch (e) {
+            toast(String((e && e.message) || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ''), 'err');
+          }
+        });
+        r.appendChild(b);
+      }
+      accts.appendChild(r);
+    }
+
+    // Project folders
+    const roots = $('phoneRoots');
+    roots.innerHTML = '';
+    for (const dir of phone.roots) {
+      const c = document.createElement('span');
+      c.className = `chip root${phone.rootsSet ? ' on' : ''}`;
+      c.title = dir;
+      c.textContent = basename(dir) || dir;
+      const x = document.createElement('button');
+      x.className = 'chip-x';
+      x.textContent = '×';
+      x.title = 'Remove';
+      x.addEventListener('click', () => api.phone.set({ roots: phone.roots.filter((r) => r !== dir) }));
+      c.appendChild(x);
+      roots.appendChild(c);
+    }
+    $('rootsHint').textContent = phone.rootsSet
+      ? 'Your phone can browse these, start Claude in any folder inside them, and create new folders there. It can also reopen each account’s recent projects.'
+      : 'Picked for you from your home folder and where your recent projects are. Your phone can browse these, start Claude in any folder inside them, and create new folders there. Add or remove one to choose your own.';
+
+    $('phoneMode').value = phone.permissionMode;
+    document.querySelectorAll('#phoneSpawn button').forEach((b) => b.classList.toggle('on', b.dataset.v === phone.spawn));
+    $('phoneAwake').classList.toggle('on', phone.keepAwake);
+
+    // Servers
+    const list = $('phoneServers');
+    list.innerHTML = phone.servers.length ? '' : '<p class="hint">Nothing yet. Folders you start from your phone show up here.</p>';
+    for (const s of phone.servers) {
+      const [text, tone] = serverLine(s);
+      const r = document.createElement('div');
+      r.className = 'pline';
+      r.innerHTML = `<span class="pdot"></span><div class="pmain"><b></b><span class="psub"></span></div>`;
+      r.querySelector('.pdot').style.background = s.color;
+      r.querySelector('b').textContent = `${s.name} · ${s.accountName}`;
+      r.querySelector('b').title = s.folder;
+      const sub = r.querySelector('.psub');
+      sub.textContent = text;
+      sub.className = `psub ${tone}`;
+      if (['starting', 'asking', 'ready'].includes(s.status)) {
+        const b = document.createElement('button');
+        b.className = 'btn secondary small';
+        b.textContent = 'Stop';
+        b.addEventListener('click', () => api.phone.stop(s.id).catch(() => {}));
+        r.appendChild(b);
+      }
+      list.appendChild(r);
+    }
+  }
+
+  $('phoneOn').addEventListener('click', () => api.phone.set({ enabled: !(phone && phone.enabled) }));
+  $('pairBtn').addEventListener('click', () => api.phone.pair().then(() => loadPhone()));
+  $('pairCancel').addEventListener('click', () => api.phone.cancelPair());
+  $('phoneRecheck').addEventListener('click', async () => {
+    $('phoneRecheck').disabled = true;
+    await loadPhone(true);
+    $('phoneRecheck').disabled = false;
+  });
+  $('rootAdd').addEventListener('click', async () => {
+    const dir = await api.pickFolder({ title: 'A folder your phone can open projects in' });
+    if (!dir || !phone) return;
+    if (phone.roots.some((r) => r.toLowerCase() === dir.toLowerCase())) return;
+    api.phone.set({ roots: [...phone.roots, dir] });
+  });
+  $('phoneMode').addEventListener('change', (e) => api.phone.set({ permissionMode: e.target.value }));
+  $('phoneSpawn').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (b) api.phone.set({ spawn: b.dataset.v });
+  });
+  $('phoneAwake').addEventListener('click', () => api.phone.set({ keepAwake: !(phone && phone.keepAwake) }));
+  $('ntfyLink').addEventListener('click', () => api.openExternal('https://ntfy.sh'));
+  api.on('phone', () => loadPhone());
+  // After a sign-in window, ask Claude Code again when Flock comes back to the front.
+  window.addEventListener('focus', () => {
+    if (phone && phone.enabled && Date.now() - signingInAt < 15 * 60 * 1000) loadPhone(true);
+  });
+
   // ── Wiring ────────────────────────────────────────────────────────────────
 
   function render() {
@@ -568,6 +767,7 @@
     }
     if (g.add) openSheet(null);
     else if (g.edit) openSheet(g.edit);
+    else if (g.phone) $('phoneSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   api.on('settings:goto', goTo);
@@ -575,6 +775,7 @@
     .then((s) => {
       state = s;
       render();
+      loadPhone();
       return api.takeGoto();
     })
     .then((fromMain) => {

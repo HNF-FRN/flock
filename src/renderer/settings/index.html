@@ -102,6 +102,59 @@
       </div>
     </section>
 
+    <section id="phoneSec">
+      <h2>Phone <span class="spacer"></span>
+        <button class="switch" id="phoneOn" aria-label="Use Flock from your phone"></button>
+      </h2>
+      <p class="hint">Start Claude Code on this PC from your phone, in any account and any project folder, even a new one, and work in it from the Claude app. Handy when you're away and no session has Remote Control on, or a session's context is full.</p>
+      <div class="phone-body hidden" id="phoneBody">
+        <div class="pair-card hidden" id="pairCard">
+          <div class="qr" id="pairQr"></div>
+          <div class="pair-text">
+            <b>Scan this with your phone's camera</b>
+            <p class="hint">It opens the Flock app in your phone's browser and pairs it with this PC. Then add it to your home screen. The code holds the key to this PC: don't share it.</p>
+            <p class="hint" id="pairUntil"></p>
+            <div><button class="btn secondary small" id="pairCancel">Cancel</button></div>
+          </div>
+        </div>
+        <div class="row top"><span class="grow">Paired phones</span><button class="btn primary small" id="pairBtn">Pair a phone</button></div>
+        <div class="phone-list" id="phoneDevices"></div>
+
+        <div class="row top"><span class="grow">Claude Code sign-in for each account</span><button class="btn secondary small" id="phoneRecheck">Check again</button></div>
+        <div class="phone-list" id="phoneAccts"></div>
+        <p class="hint">Sessions from your phone run in Claude Code on this PC, with the account's ~/.claude. Sign each account's Claude Code in once, to the same Claude account as its window.</p>
+
+        <div class="row top"><span class="grow">Project folders your phone can open</span><button class="btn secondary small" id="rootAdd">Add folder…</button></div>
+        <div class="chips" id="phoneRoots"></div>
+        <p class="hint" id="rootsHint"></p>
+
+        <div class="row">
+          <span class="grow">Permission mode for phone sessions</span>
+          <select id="phoneMode">
+            <option value="default">Ask before acting</option>
+            <option value="acceptEdits">Accept edits</option>
+            <option value="auto">Auto</option>
+            <option value="plan">Plan</option>
+          </select>
+        </div>
+        <div class="row">
+          <span class="grow">More sessions in a git folder</span>
+          <div class="seg" id="phoneSpawn">
+            <button data-v="same-dir">Share the folder</button>
+            <button data-v="worktree">Own worktree</button>
+          </div>
+        </div>
+        <div class="row">
+          <span class="grow">Keep this PC awake while a phone is paired</span>
+          <button class="switch" id="phoneAwake" aria-label="Keep this PC awake while a phone is paired"></button>
+        </div>
+
+        <div class="row top"><span class="grow">Running for your phone</span></div>
+        <div class="phone-list" id="phoneServers"></div>
+        <p class="hint">Flock and your phone talk through <span class="link" id="ntfyLink">ntfy.sh</span>, end-to-end encrypted with a key only they hold. Flock never sends Claude a prompt: what Claude does is up to you, in the Claude app.</p>
+      </div>
+    </section>
+
     <section id="signinSec">
       <h2>Signing in</h2>
       <p class="hint">Each new account signs in once, in its own window, and stays signed in.</p>

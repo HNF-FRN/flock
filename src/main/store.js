@@ -26,6 +26,31 @@ const DEFAULT_SETTINGS = {
   islandYield: true, // the island steps aside while another app's window lies under it
 };
 
+// Using Flock from a phone (phone.js). Off until a phone is paired from Settings.
+const DEFAULT_PHONE = {
+  enabled: false,
+  server: 'https://ntfy.sh', // the relay the encrypted messages travel through
+  appUrl: 'https://hnf-frn.github.io/flock/app/', // where the phone app is served
+  devices: [], // [{ id, name, topic, key (sealed with Windows' DPAPI), pairedAt, seenAt }]
+  roots: [], // project folders the phone may open; empty = home and the folders of recent projects
+  permissionMode: 'default', // for the sessions phone servers start: default | acceptEdits | auto | plan
+  spawn: 'same-dir', // sessions the Claude app adds to a server: 'same-dir' or 'worktree' (git)
+  keepAwake: true, // keep the PC from sleeping while a phone is paired
+  recent: [], // [{ account, path, at }] folders started from the phone
+  slots: {}, // account id -> 'default' | 'explicit': the Claude Code sign-in an account sharing ~/.claude uses
+};
+
+function normalizePhone(raw) {
+  const p = { ...DEFAULT_PHONE, ...(raw && typeof raw === 'object' ? raw : {}) };
+  p.devices = Array.isArray(p.devices) ? p.devices.filter((d) => d && d.id && d.topic && d.key) : [];
+  p.roots = Array.isArray(p.roots) ? p.roots.filter((r) => typeof r === 'string' && r) : [];
+  p.recent = Array.isArray(p.recent) ? p.recent.filter((r) => r && r.account && r.path).slice(0, 40) : [];
+  p.slots = p.slots && typeof p.slots === 'object' ? p.slots : {};
+  if (!['default', 'acceptEdits', 'auto', 'plan'].includes(p.permissionMode)) p.permissionMode = 'default';
+  if (!['same-dir', 'worktree'].includes(p.spawn)) p.spawn = 'same-dir';
+  return p;
+}
+
 function mainProfile() {
   return {
     id: 'main',
@@ -60,7 +85,7 @@ function normalize(raw) {
     ...p,
     color: /^#[0-9a-f]{6}$/i.test(p.color || '') ? p.color.toUpperCase() : PALETTE[0],
   }));
-  return { version: 1, settings, profiles };
+  return { version: 1, settings, profiles, phone: normalizePhone(d.phone) };
 }
 
 function load() {
@@ -97,4 +122,4 @@ function update(mutator) {
   return data;
 }
 
-module.exports = { PALETTE, DEFAULT_SETTINGS, load, save, get, update };
+module.exports = { PALETTE, DEFAULT_SETTINGS, DEFAULT_PHONE, load, save, get, update };

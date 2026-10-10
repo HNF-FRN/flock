@@ -771,3 +771,158 @@ footer {
   border-radius: 10px;
   border: 3px solid var(--bg);
 }
+
+/* ── Phone ─────────────────────────────────────────────────────────────── */
+
+.phone-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pair-card {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--card-flat);
+  border: 1px solid var(--hair);
+}
+
+.pair-card.hidden {
+  display: none;
+}
+
+.qr {
+  flex: 0 0 188px;
+  width: 188px;
+  height: 188px;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pair-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pair-text b {
+  font: 600 13px var(--font);
+}
+
+.phone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0 -8px;
+}
+
+.phone-list > .hint,
+.phone-list > .notice {
+  margin: 0 8px;
+}
+
+.pline {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.pline:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.picon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  display: grid;
+  place-items: center;
+  color: var(--dim);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.pavatar {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+}
+
+.pdot {
+  width: 10px;
+  height: 10px;
+  margin: 0 9px;
+  flex: 0 0 10px;
+  border-radius: 50%;
+}
+
+.pmain {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pmain b {
+  font: 600 12.5px var(--font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.psub {
+  font: 400 11.5px var(--font);
+  color: var(--dim-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.psub.ok {
+  color: #86efac;
+}
+
+.psub.warn {
+  color: var(--amber-text);
+}
+
+.psub.err {
+  color: var(--red-text);
+}
+
+.chip.root {
+  padding: 3px 4px 3px 11px;
+  cursor: default;
+}
+
+.chip.root:not(.on) {
+  border-style: dashed;
+}
+
+.chip-x {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--dim-3);
+  font: 500 13px/1 var(--font);
+}
+
+.chip-x:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+}

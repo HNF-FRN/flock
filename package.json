@@ -1,7 +1,7 @@
 {
   "name": "flock",
   "productName": "Flock",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Run Claude Desktop with several accounts side by side.",
   "author": "HNF-FRN",
   "license": "MIT",
@@ -46,5 +46,8 @@
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false
     }
+  },
+  "dependencies": {
+    "qrcode-generator": "2.0.4"
   }
 }

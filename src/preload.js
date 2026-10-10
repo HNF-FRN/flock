@@ -3,7 +3,7 @@
 
 const { contextBridge, ipcRenderer } = require('electron');
 
-const EVENTS = new Set(['state', 'toast', 'island:toggle', 'island:expand', 'island:blur', 'island:yield', 'settings:goto', 'edge']);
+const EVENTS = new Set(['state', 'toast', 'island:toggle', 'island:expand', 'island:blur', 'island:yield', 'settings:goto', 'edge', 'phone']);
 
 contextBridge.exposeInMainWorld('flock', {
   getState: () => ipcRenderer.invoke('state:get'),
@@ -36,6 +36,15 @@ contextBridge.exposeInMainWorld('flock', {
   seedInfo: () => ipcRenderer.invoke('seed:info'),
   suggestPaths: (name) => ipcRenderer.invoke('suggest:paths', name),
   pickFolder: (opts) => ipcRenderer.invoke('dialog:folder', opts),
+  phone: {
+    view: (opts) => ipcRenderer.invoke('phone:view', opts),
+    set: (patch) => ipcRenderer.invoke('phone:set', patch),
+    pair: () => ipcRenderer.invoke('phone:pair'),
+    cancelPair: () => ipcRenderer.invoke('phone:cancelPair'),
+    unpair: (id) => ipcRenderer.invoke('phone:unpair', id),
+    signIn: (id) => ipcRenderer.invoke('phone:signIn', id),
+    stop: (id) => ipcRenderer.invoke('phone:stop', id),
+  },
   quitApp: () => ipcRenderer.invoke('app:quit'),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
 

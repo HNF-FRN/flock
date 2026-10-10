@@ -24,6 +24,7 @@
     dot: s('<circle cx="8" cy="8" r="2.6" fill="currentColor" stroke="none"/>'),
     edit: s('<path d="M10.4 3.2 12.8 5.6 5.6 12.8H3.2v-2.4z"/>'),
     trash: s('<path d="M3 4.4h10M6.4 4.4V3h3.2v1.4M4.4 4.4l.6 8.6h6l.6-8.6"/>'),
+    phone: s('<rect x="4.4" y="1.8" width="7.2" height="12.4" rx="1.6"/><path d="M7 11.8h2"/>'),
     drag: s('<circle cx="6" cy="4" r=".8" fill="currentColor"/><circle cx="10" cy="4" r=".8" fill="currentColor"/><circle cx="6" cy="8" r=".8" fill="currentColor"/><circle cx="10" cy="8" r=".8" fill="currentColor"/><circle cx="6" cy="12" r=".8" fill="currentColor"/><circle cx="10" cy="12" r=".8" fill="currentColor"/>'),
   };
 })();

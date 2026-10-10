@@ -13,6 +13,8 @@ const configdir = require('./configdir');
 const procscan = require('./procscan');
 const windows = require('./windows');
 const sessions = require('./sessions');
+const phone = require('./phone');
+const pty = require('./pty');
 const { createRouter } = require('./links');
 const linkwatch = require('./linkwatch');
 const { log, safeUrl } = require('./log');
@@ -149,6 +151,14 @@ function broadcast(force) {
 function toast(text, tone = 'info') {
   send(island, 'toast', { text, tone });
   send(settingsWin, 'toast', { text, tone });
+}
+
+let phoneTimer = 0;
+
+/** Tells the settings window that something in its Phone section changed (it asks for the details). */
+function phoneChanged() {
+  clearTimeout(phoneTimer);
+  phoneTimer = setTimeout(() => send(settingsWin, 'phone'), 150);
 }
 
 // ── Watching Claude windows ─────────────────────────────────────────────────
@@ -667,7 +677,10 @@ function openSettings(goto) {
   // A brand-new window may not be listening yet: it asks for this once it has loaded.
   settingsGoto = goto || null;
   settingsWin.once('ready-to-show', () => settingsWin.show());
-  settingsWin.on('closed', () => { settingsWin = null; });
+  settingsWin.on('closed', () => {
+    settingsWin = null;
+    phone.cancelPairing(); // a pairing code only lives while it is on screen
+  });
   schedulePoll(0);
 }
 
@@ -693,6 +706,7 @@ function rebuildTray(s) {
     { type: 'separator' },
     { label: 'Open every account', click: () => launchMany(s.accounts.map((a) => a.id)) },
     { label: 'Show the island', click: () => expandIsland() },
+    { label: 'Phone…', click: () => openSettings({ phone: true }) },
     { label: 'Settings…', click: () => openSettings() },
     { type: 'separator' },
     { label: 'Quit Flock', click: () => app.quit() },
@@ -753,11 +767,18 @@ function wireIpc() {
     });
     return r.canceled ? null : r.filePaths[0];
   });
+  ipcMain.handle('phone:view', (_e, opts) => phone.view(opts || {}));
+  ipcMain.handle('phone:set', (_e, patch) => phone.setOptions(patch || {}));
+  ipcMain.handle('phone:pair', () => phone.pair());
+  ipcMain.handle('phone:cancelPair', () => { phone.cancelPairing(); phoneChanged(); });
+  ipcMain.handle('phone:unpair', (_e, id) => phone.unpair(id));
+  ipcMain.handle('phone:signIn', (_e, id) => phone.signIn(id));
+  ipcMain.handle('phone:stop', (_e, id) => phone.stopServer(id));
   ipcMain.handle('app:quit', () => app.quit());
   ipcMain.handle('app:openExternal', (_e, url) => {
     let u;
     try { u = new URL(String(url)); } catch { return; }
-    if (u.protocol === 'https:' && ['claude.ai', 'github.com'].includes(u.hostname)) shell.openExternal(u.toString());
+    if (u.protocol === 'https:' && ['claude.ai', 'claude.com', 'github.com', 'ntfy.sh'].includes(u.hostname)) shell.openExternal(u.toString());
   });
   ipcMain.on('island:mouse', (_e, inside) => {
     if (island && !island.isDestroyed()) island.setIgnoreMouseEvents(!inside, { forward: true });
@@ -806,8 +827,10 @@ app.on('before-quit', (e) => {
   globalShortcut.unregisterAll();
   if (router) router.stop();
   procscan.stop();
-  // Give Claude's windows their own names and icons back before leaving.
-  windows.quit().finally(() => app.exit(0));
+  // Stop the phone's Claude Code servers, and give Claude's windows their own
+  // names and icons back, before leaving.
+  Promise.all([phone.quit().catch(() => {}).finally(() => pty.stop()), windows.quit()])
+    .finally(() => app.exit(0));
 });
 
 app.whenReady().then(async () => {
@@ -848,6 +871,20 @@ app.whenReady().then(async () => {
   });
   registerHotkey();
   applyLoginItem();
+  phone.init({
+    profiles,
+    findProfile,
+    isRunning: (id) => Boolean((live.get(id) || {}).pids && live.get(id).pids.length),
+    version: app.getVersion(),
+    scriptDir: app.getPath('userData'),
+    onChange: phoneChanged,
+    toast,
+    // Keep the pairing QR code out of screenshots and screen sharing while it shows.
+    onPairing: (on) => {
+      if (settingsWin && !settingsWin.isDestroyed()) settingsWin.setContentProtection(on);
+      phoneChanged();
+    },
+  });
   await poll();
   schedulePoll();
 

@@ -20,15 +20,17 @@ function drawInPage(size, kind, svgText) {
     const ctx = c.getContext('2d');
     const img = new Image();
     img.onload = () => {
-      if (kind === 'tile') {
+      if (kind === 'tile' || kind === 'mask') {
         const g = ctx.createLinearGradient(0, 0, 0, size);
         g.addColorStop(0, '#1d1f24');
         g.addColorStop(1, '#0b0c0e');
         ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.roundRect(0, 0, size, size, size * 0.22);
+        // A maskable icon fills the square (the phone cuts its own shape) and
+        // keeps the mascot inside the middle 60%.
+        ctx.roundRect(0, 0, size, size, kind === 'mask' ? 0 : size * 0.22);
         ctx.fill();
-        const m = size * 0.78;
+        const m = size * (kind === 'mask' ? 0.56 : 0.78);
         ctx.drawImage(img, (size - m) / 2, (size - m) / 2, m, m);
       } else {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
@@ -92,6 +94,12 @@ app.whenReady().then(async () => {
   fs.writeFileSync(path.join(ROOT, 'assets', 'tray.png'), await render(16, 'tray'));
   fs.writeFileSync(path.join(ROOT, 'assets', 'tray@1.5x.png'), await render(24, 'tray'));
   fs.writeFileSync(path.join(ROOT, 'assets', 'tray@2x.png'), await render(32, 'tray'));
+  // The phone app's home-screen icons (docs/app, served by GitHub Pages).
+  const phone = path.join(ROOT, 'docs', 'app', 'icons');
+  fs.mkdirSync(phone, { recursive: true });
+  fs.writeFileSync(path.join(phone, 'icon-192.png'), await render(192, 'tile'));
+  fs.writeFileSync(path.join(phone, 'icon-512.png'), await render(512, 'tile'));
+  fs.writeFileSync(path.join(phone, 'maskable-512.png'), await render(512, 'mask'));
   console.log('icons written');
   app.quit();
 });

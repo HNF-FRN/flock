@@ -344,6 +344,7 @@ const GLYPHS = {
   'out-of-way': '<rect x="2.5" y="14" width="19" height="6" rx="3"/><path d="M8 9.5l4-4 4 4"/>',
   keyboard: '<rect x="3" y="3.5" width="18" height="17" rx="4"/><path d="M7 16.5h10"/><path d="M11 7.5l1.6-1v6"/>',
   trust: '<path d="M12 2.8l7.5 3v5.4c0 4.6-3.2 8.1-7.5 10-4.3-1.9-7.5-5.4-7.5-10V5.8z"/><path d="M8.8 12l2.3 2.3 4.3-4.6"/>',
+  phone: '<rect x="4.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M8.5 18.2h3"/><path d="M18.5 8.5a4.5 4.5 0 0 1 0 7"/><path d="M21 6a8 8 0 0 1 0 12"/>',
 };
 
 function icon(name, color) {

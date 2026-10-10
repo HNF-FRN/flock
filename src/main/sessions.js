@@ -70,11 +70,8 @@ async function load(file) {
   return session;
 }
 
-/**
- * Newest first, archived ones left out: [{ id, title, cwd, folder, at }]. The
- * sessions in `keep` are always listed, first, within `limit`.
- */
-async function recent(profile, limit = 6, keep = []) {
+/** Every session of the signed-in account, newest first. */
+async function everyone(profile) {
   const files = [];
   for (const dir of await folders(profile)) {
     for (const name of await entries(dir, false)) {
@@ -82,7 +79,15 @@ async function recent(profile, limit = 6, keep = []) {
     }
   }
   const all = (await Promise.all(files.map(load))).filter(Boolean);
-  all.sort((x, y) => y.at - x.at);
+  return all.sort((x, y) => y.at - x.at);
+}
+
+/**
+ * Newest first, archived ones left out: [{ id, title, cwd, folder, at }]. The
+ * sessions in `keep` are always listed, first, within `limit`.
+ */
+async function recent(profile, limit = 6, keep = []) {
+  const all = await everyone(profile);
   const kept = new Set(keep);
   const first = all.filter((s) => kept.has(s.id));
   const rest = all.filter((s) => !kept.has(s.id) && !s.archived);
@@ -138,4 +143,37 @@ async function find(profile, id) {
   return null;
 }
 
-module.exports = { ID_RE, recent, find, popouts };
+/** The folders the account's Code sessions ran in, newest first: [{ path, at }]. */
+async function recentFolders(profile, limit = 12) {
+  const seen = new Set();
+  const out = [];
+  for (const s of await everyone(profile)) {
+    if (!s.cwd) continue;
+    const key = s.cwd.replace(/[\\/]+$/, '').toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ path: s.cwd, at: s.at });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/**
+ * The organization the signed-in account works in, read from the folder names
+ * (<account>/<organization>): an account can belong to several, and the one
+ * holding its sessions is the one its window uses. Null before its first session.
+ */
+async function orgOf(profile) {
+  const { accountId } = claude.readAccount(claude.dataDirOf(profile));
+  let best = null;
+  for (const dir of await folders(profile)) {
+    const [a, b] = dir.split(path.sep).slice(-2);
+    const org = a === accountId ? b : b === accountId ? a : null;
+    if (!org || org === accountId) continue;
+    const count = (await entries(dir, false)).filter((n) => FILE_RE.test(n)).length;
+    if (!best || count > best.count) best = { org, count };
+  }
+  return best ? best.org : null;
+}
+
+module.exports = { ID_RE, recent, find, popouts, recentFolders, orgOf };

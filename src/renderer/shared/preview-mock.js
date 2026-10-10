@@ -48,6 +48,41 @@
       { id: 'local_9c0d1e2f-0001', title: 'Onboarding emails', cwd: `${work}\\client-a`, at: ago(2 * 24 * 60) },
     ],
   };
+  // The Phone section of Settings, as the main process describes it.
+  const previewQr = (() => {
+    let cells = '';
+    for (let y = 0; y < 25; y++) for (let x = 0; x < 25; x++) {
+      const finder = (x < 7 && y < 7) || (x > 17 && y < 7) || (x < 7 && y > 17);
+      const on = finder ? (x % 6 === 0 || y % 6 === 0 || (x % 18 > 1 && x % 18 < 5 && y % 18 > 1 && y % 18 < 5)) : ((x * 7 + y * 13) % 5 < 2);
+      if (on) cells += `<rect x="${x + 2}" y="${y + 2}" width="1" height="1"/>`;
+    }
+    return `<svg viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg"><rect width="29" height="29" fill="#fff"/><g fill="#000">${cells}</g></svg>`;
+  })();
+  const phoneView = {
+    enabled: params.get('phone') !== 'off',
+    cliFound: true,
+    devices: [{ id: 'd1', name: 'Pixel 9', pairedAt: now - 3 * 86400000, seenAt: now - 12 * 60000 }],
+    pairing: params.get('pair') ? { url: 'https://example.invalid/app/#p=preview', svg: previewQr, until: now + 540000 } : null,
+    accounts: [
+      { id: 'main', name: 'Main', color: '#D97757', cli: { ok: true, email: 'personal@gmail.com', slot: 'explicit' } },
+      { id: 'p1', name: 'Work', color: '#38BDF8', cli: { ok: true, email: 'me@studio.co', slot: null } },
+      { id: 'p2', name: 'Client A', color: '#4ADE80', cli: { ok: false, problem: 'signed-out', slot: 'default' } },
+      { id: 'p3', name: 'Research', color: '#C084FC', cli: { ok: false, problem: 'other-account', email: 'me@studio.co' } },
+      { id: 'p4', name: 'Side project', color: '#FACC15', cli: { ok: false, problem: 'unsupported' } },
+    ],
+    roots: [home, `${home}\\work`, `${home}\\Downloads`],
+    rootsSet: false,
+    servers: [
+      { id: 'rc1', account: 'p1', accountName: 'Work', color: '#38BDF8', folder: `${work}\\client-portal`, name: 'client-portal', status: 'ready', sessions: [{ url: 'https://claude.ai/code/session_x', title: 'Pricing table' }, { url: 'https://claude.ai/code/session_y', title: null }], startedAt: now - 3600000 },
+      { id: 'rc2', account: 'main', accountName: 'Main', color: '#D97757', folder: `${work}\\new-idea`, name: 'new-idea', status: 'asking', sessions: [], startedAt: now - 60000 },
+      { id: 'rc3', account: 'main', accountName: 'Main', color: '#D97757', folder: `${work}\\scratch`, name: 'scratch', status: 'failed', error: 'Remote Control did not start: C:\\Users\\you\\work\\scratch is not trusted.', sessions: [], startedAt: now - 7200000 },
+    ],
+    permissionMode: 'default',
+    spawn: 'same-dir',
+    keepAwake: true,
+    server: 'https://ntfy.sh',
+    appUrl: 'https://example.invalid/app/',
+  };
   const delay = (v) => new Promise((r) => setTimeout(() => r(v), 60));
   window.flock = {
     getState: () => delay(JSON.parse(JSON.stringify(state))),
@@ -80,6 +115,15 @@
     seedInfo: () => delay({ from: `${home}\\.claude`, basics: ['CLAUDE.md', 'settings.json'], skillsBytes: 174063616 }),
     suggestPaths: (name) => delay({ dataDir: `${home}\\AppData\\Roaming\\Claude-${(name || 'Account').replace(/\W+/g, '-')}`, configDir: `${home}\\.claude-${(name || 'account').toLowerCase().replace(/\W+/g, '-')}` }),
     pickFolder: () => delay(null),
+    phone: {
+      view: () => delay(JSON.parse(JSON.stringify(phoneView))),
+      set(patch) { Object.assign(phoneView, patch); if ('roots' in patch) phoneView.rootsSet = true; emit('phone'); return delay(); },
+      pair() { phoneView.pairing = { url: 'https://example.invalid/app/#p=preview', svg: previewQr, until: Date.now() + 600000 }; emit('phone'); return delay(); },
+      cancelPair() { phoneView.pairing = null; emit('phone'); return delay(); },
+      unpair(id) { phoneView.devices = phoneView.devices.filter((d) => d.id !== id); emit('phone'); return delay(); },
+      signIn(id) { emit('toast', { text: `(would open a sign-in window for ${id})` }); return delay(); },
+      stop(id) { const s = phoneView.servers.find((x) => x.id === id); if (s) s.status = 'stopped'; emit('phone'); return delay(); },
+    },
     quitApp: () => delay(),
     openExternal: () => delay(),
     islandMouse() {}, islandExpanded() {}, islandWidth() {},
