@@ -37,7 +37,8 @@ const DEFAULT_PHONE = {
   spawn: 'same-dir', // sessions the Claude app adds to a server: 'same-dir' or 'worktree' (git)
   keepAwake: true, // keep the PC from sleeping while a phone is paired
   recent: [], // [{ account, path, at }] folders started from the phone
-  slots: {}, // account id -> 'default' | 'explicit': the Claude Code sign-in an account sharing ~/.claude uses
+  owners: {}, // Claude Code sign-in (cli.js) -> the account id it was signed in for from Flock
+  renew: false, // the ~/.claude sign-in has to be signed in again before Flock trusts whose it is
 };
 
 function normalizePhone(raw) {
@@ -45,7 +46,15 @@ function normalizePhone(raw) {
   p.devices = Array.isArray(p.devices) ? p.devices.filter((d) => d && d.id && d.topic && d.key) : [];
   p.roots = Array.isArray(p.roots) ? p.roots.filter((r) => typeof r === 'string' && r) : [];
   p.recent = Array.isArray(p.recent) ? p.recent.filter((r) => r && r.account && r.path).slice(0, 40) : [];
-  p.slots = p.slots && typeof p.slots === 'object' ? p.slots : {};
+  p.owners = p.owners && typeof p.owners === 'object' ? p.owners : {};
+  // Flock 0.2.1 signed a second account sharing ~/.claude in with
+  // CLAUDE_CONFIG_DIR set to ~/.claude ('explicit'). On Windows that wrote over
+  // the ~/.claude sign-in, which may still be that account's under another's name.
+  if (p.slots) {
+    if (typeof p.slots === 'object' && Object.values(p.slots).includes('explicit')) p.renew = true;
+    delete p.slots;
+  }
+  p.renew = p.renew === true;
   if (!['default', 'acceptEdits', 'auto', 'plan'].includes(p.permissionMode)) p.permissionMode = 'default';
   if (!['same-dir', 'worktree'].includes(p.spawn)) p.spawn = 'same-dir';
   return p;

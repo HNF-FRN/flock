@@ -169,7 +169,8 @@ function configDirOf(profile, profiles) {
 
 // Variables that belong to the process that started Flock — for instance a
 // Claude Code session — and must not leak into a fresh Claude window.
-const SESSION_VAR_RE = /^(CLAUDECODE|CLAUDE_CODE_.*|CLAUDE_AGENT_SDK_.*|CLAUDE_PID|CLAUDE_PREVIEW_.*|ANTHROPIC_.*|CLAUDE_CONFIG_DIR)$/i;
+// CLAUDE_SECURESTORAGE_CONFIG_DIR moves where Claude Code keeps its sign-in.
+const SESSION_VAR_RE = /^(CLAUDECODE|CLAUDE_CODE_.*|CLAUDE_AGENT_SDK_.*|CLAUDE_PID|CLAUDE_PREVIEW_.*|ANTHROPIC_.*|CLAUDE_CONFIG_DIR|CLAUDE_SECURESTORAGE_CONFIG_DIR)$/i;
 const NEVER_PASS_RE = /^(ELECTRON_RUN_AS_NODE|ELECTRON_NO_ATTACH_CONSOLE|ELECTRON_ENABLE_LOGGING|ELECTRON_LOG_FILE|ELECTRON_ENABLE_STACK_DUMPING|NODE_OPTIONS)$/i;
 
 function envFor(profile, profiles) {

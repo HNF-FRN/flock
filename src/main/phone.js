@@ -63,9 +63,15 @@ function usageOf(p) {
   return out.fh == null && out.sd == null ? null : out;
 }
 
+/** The account whose Claude Code sign-in an 'unsupported' account would share, by name. */
+function holderName(s) {
+  const p = s && s.problem === 'unsupported' ? deps.findProfile(s.holder) : null;
+  return p ? p.name : null;
+}
+
 function cliView(s) {
   if (!s) return { ok: false, problem: 'unknown' };
-  return { ok: Boolean(s.ok), problem: s.problem || null, email: s.status ? s.status.email : null, slot: s.slot };
+  return { ok: Boolean(s.ok), problem: s.problem || null, email: s.status ? s.status.email : null, holder: holderName(s) };
 }
 
 function serverView(snap) {
@@ -75,7 +81,7 @@ function serverView(snap) {
 
 async function state() {
   const profiles = deps.profiles();
-  const signIns = await cli.signIns(profiles, opts().slots);
+  const signIns = await cli.signIns(profiles, opts());
   return {
     pc: { name: os.hostname(), version: deps.version },
     accounts: profiles.map((p) => ({
@@ -182,7 +188,11 @@ function problemText(p, s) {
     case 'signed-out': return `${name}’s Claude Code isn’t signed in yet. On your PC: Flock → Settings → Phone → Sign in next to ${name}.`;
     case 'other-account': return `${name}’s Claude Code is signed in as ${s.status.email || 'another account'}, not ${name}’s Claude account. Sign it in again from Flock’s settings on your PC.`;
     case 'not-claude-ai': return `${name}’s Claude Code uses an API key. Remote Control needs a claude.ai sign-in: sign in again from Flock’s settings on your PC.`;
-    case 'unsupported': return `Only two accounts that share ~/.claude can start sessions from the phone. Give ${name} its own ~/.claude in Flock to use it here.`;
+    case 'renew': return `${name}’s Claude Code sign-in may have been taken over by another account. Sign it in again from Flock’s settings on your PC.`;
+    case 'unsupported': {
+      const other = holderName(s) || 'another account';
+      return `${name} uses the same ~/.claude as ${other}, and Claude Code keeps one sign-in per ~/.claude: ${other}’s. To start sessions as ${name}, give it its own ~/.claude in Flock on your PC.`;
+    }
     default: return `Flock couldn’t check ${name}’s Claude Code sign-in.`;
   }
 }
@@ -193,7 +203,7 @@ async function startServer(accountId, dir) {
   if (!folders.allowed(dir, await rootList(), await everyRecent())) {
     throw new Error('That folder isn’t in your project folders. Add it in Flock’s settings on the PC.');
   }
-  const signIn = (await cli.signIns(deps.profiles(), opts().slots)).get(p.id);
+  const signIn = (await cli.signIns(deps.profiles(), opts())).get(p.id);
   if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
   const launcher = cli.launcher();
   const spawnMode = opts().spawn === 'worktree' && folders.isGitRepo(dir) ? 'worktree' : 'same-dir';
@@ -227,7 +237,7 @@ async function continueSession(accountId, sessionId) {
   const s = sessionId ? await sessions.find(p, sessionId) : null;
   if (!s || !s.cli) throw new Error('Flock can’t find that session on your PC any more.');
   if (!s.cwd || !folders.isDir(s.cwd)) throw new Error('That session’s folder isn’t on your PC any more.');
-  const signIn = (await cli.signIns(deps.profiles(), opts().slots)).get(p.id);
+  const signIn = (await cli.signIns(deps.profiles(), opts())).get(p.id);
   if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
   const forkId = deps.isRunning(p.id) ? crypto.randomUUID() : null;
   const title = (s.title || path.basename(s.cwd)).replace(/[\r\n\t]+/g, ' ').slice(0, 80);
@@ -461,7 +471,7 @@ function unpair(id) {
 async function view({ fresh } = {}) {
   const o = opts();
   const profiles = deps.profiles();
-  const signIns = await cli.signIns(profiles, o.slots, { fresh });
+  const signIns = await cli.signIns(profiles, o, { fresh });
   const roots = await rootList();
   return {
     enabled: o.enabled,
@@ -490,12 +500,15 @@ async function setOptions(patch) {
   deps.onChange();
 }
 
-/** Opens a terminal to sign this account's Claude Code in, and remembers which sign-in it uses. */
+/** Opens a terminal to sign this account's Claude Code in, and remembers that this sign-in is the account's. */
 async function signIn(id) {
   const p = profileOr(id);
-  const s = (await cli.signIns(deps.profiles(), opts().slots)).get(p.id);
-  if (!s || s.unsupported) throw new Error(`Only two accounts that share ~/.claude can have their own Claude Code sign-in. Give ${p.name} its own ~/.claude first.`);
-  if (s.slot) store.update((d) => { d.phone.slots[p.id] = s.slot; });
+  const s = (await cli.signIns(deps.profiles(), opts())).get(p.id);
+  if (!s || s.problem === 'unsupported') throw new Error(problemText(p, s || {}));
+  store.update((d) => {
+    d.phone.owners[s.key] = p.id;
+    if (!s.dir) d.phone.renew = false;
+  });
   cli.openSignIn(s.dir, { title: `Flock: sign ${p.name} in to Claude Code`, account: p.name, scriptDir: deps.scriptDir });
   log('phone', 'sign-in window for', p.name, s.dir || '(default sign-in)');
 }

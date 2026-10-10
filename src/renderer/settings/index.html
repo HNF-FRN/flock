@@ -122,7 +122,7 @@
 
         <div class="row top"><span class="grow">Claude Code sign-in for each account</span><button class="btn secondary small" id="phoneRecheck">Check again</button></div>
         <div class="phone-list" id="phoneAccts"></div>
-        <p class="hint">Sessions from your phone run in Claude Code on this PC, with the account's ~/.claude. Sign each account's Claude Code in once, to the same Claude account as its window.</p>
+        <p class="hint">Sessions from your phone run in Claude Code on this PC, with the account's ~/.claude. Sign each account's Claude Code in once, to the same Claude account as its window. Claude Code keeps one sign-in per ~/.claude, so of the accounts that share one, only one can be used from your phone.</p>
 
         <div class="row top"><span class="grow">Project folders your phone can open</span><button class="btn secondary small" id="rootAdd">Add folder…</button></div>
         <div class="chips" id="phoneRoots"></div>
@@ -211,7 +211,7 @@
           <button data-mode="link">Same as…</button>
         </div>
         <div class="mode-detail" data-for="shared">
-          <p class="hint">Uses <code>~\.claude</code> like your other shared accounts: same CLAUDE.md, skills, plugins, settings and memory.</p>
+          <p class="hint">Uses <code>~\.claude</code> like your other shared accounts: same CLAUDE.md, skills, plugins, settings and memory. They also share one Claude Code sign-in, so only one of them can start sessions from your phone.</p>
         </div>
         <div class="mode-detail" data-for="own">
           <div class="pathrow"><code id="fOwnDir"></code><button class="btn secondary small" id="fOwnPick">Change…</button></div>
