@@ -38,7 +38,8 @@ const DEFAULT_PHONE = {
   keepAwake: true, // keep the PC from sleeping while a phone is paired
   recent: [], // [{ account, path, at }] folders started from the phone
   owners: {}, // Claude Code sign-in (cli.js) -> the account id it was signed in for from Flock
-  renew: false, // the ~/.claude sign-in has to be signed in again before Flock trusts whose it is
+  pending: {}, // account id -> { key, done }: sign-in windows Flock opened, until `done` shows they succeeded
+  renew: false, // ~/.claude's own sign-in has to be signed in again before Flock trusts whose it is
 };
 
 function normalizePhone(raw) {
@@ -47,9 +48,12 @@ function normalizePhone(raw) {
   p.roots = Array.isArray(p.roots) ? p.roots.filter((r) => typeof r === 'string' && r) : [];
   p.recent = Array.isArray(p.recent) ? p.recent.filter((r) => r && r.account && r.path).slice(0, 40) : [];
   p.owners = p.owners && typeof p.owners === 'object' ? p.owners : {};
+  p.pending = p.pending && typeof p.pending === 'object' ? p.pending : {};
+  for (const [id, w] of Object.entries(p.pending)) if (!w || typeof w.key !== 'string' || typeof w.done !== 'string') delete p.pending[id];
   // Flock 0.2.1 signed a second account sharing ~/.claude in with
-  // CLAUDE_CONFIG_DIR set to ~/.claude ('explicit'). On Windows that wrote over
-  // the ~/.claude sign-in, which may still be that account's under another's name.
+  // CLAUDE_CONFIG_DIR set to ~/.claude ('explicit'), without a folder of its
+  // own for the sign-in. On Windows that wrote over ~/.claude's own sign-in,
+  // which may still be that account's under another's name.
   if (p.slots) {
     if (typeof p.slots === 'object' && Object.values(p.slots).includes('explicit')) p.renew = true;
     delete p.slots;

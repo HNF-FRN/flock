@@ -37,7 +37,8 @@ let blocker = null;
 let recentCache = { at: 0, list: [] };
 
 const opts = () => store.get().phone;
-const signingIn = new Map(); // Claude Code sign-in key -> { id, dir, done }: sign-in windows not finished yet
+// Where Flock keeps the second Claude Code sign-in for ~/.claude (cli.js), one folder per account.
+const storeRoot = () => path.join(deps.scriptDir, 'sign-ins');
 
 // ── Keys ────────────────────────────────────────────────────────────────────
 // A paired phone's key is kept sealed with Windows' DPAPI (Electron's
@@ -55,23 +56,35 @@ function unseal(v) {
   return null;
 }
 
-/**
- * Each account's Claude Code sign-in (cli.signIns). A sign-in finished in a
- * window Flock opened is from then on that account's.
- */
-function accountSignIns(extra) {
-  for (const [key, w] of signingIn) {
+/** Takes in the sign-ins finished in a window Flock opened: from then on, each is its account's. */
+function settleSignIns() {
+  for (const [id, w] of Object.entries(opts().pending)) {
     if (!fs.existsSync(w.done)) continue;
-    signingIn.delete(key);
     try { fs.unlinkSync(w.done); } catch {}
     store.update((d) => {
-      d.phone.owners[key] = w.id;
-      if (!w.dir) d.phone.renew = false;
+      delete d.phone.pending[id];
+      for (const k of Object.keys(d.phone.owners)) if (d.phone.owners[k] === id) delete d.phone.owners[k];
+      d.phone.owners[w.key] = id;
+      if (w.key === cli.DEFAULT_KEY) d.phone.renew = false;
     });
     cli.forget();
-    log('phone', 'signed in', w.id, w.dir || '(default sign-in)');
+    log('phone', 'signed in', id, w.key);
   }
-  return cli.signIns(deps.profiles(), opts(), extra);
+}
+
+/** Each account's Claude Code sign-in (cli.signIns). */
+async function accountSignIns(extra) {
+  settleSignIns();
+  const o = opts();
+  // Until Flock signs an account in to ~/.claude, a name kept with
+  // CLAUDE_CONFIG_DIR set to ~/.claude comes from a sign-in that wrote over
+  // ~/.claude's own (Flock 0.2.1's, or one by hand). Once found, that stays
+  // true until ~/.claude's own is signed in again from Flock.
+  if (!o.renew && !o.owners[cli.DEFAULT_KEY] && !o.owners[cli.SECOND_KEY] && await cli.overwritten(extra)) {
+    store.update((d) => { d.phone.renew = true; });
+    log('phone', '~/.claude sign-in may be another account’s: it has to be signed in again');
+  }
+  return cli.signIns(deps.profiles(), { ...opts(), storeRoot: storeRoot() }, extra);
 }
 
 // ── Views ───────────────────────────────────────────────────────────────────
@@ -84,15 +97,16 @@ function usageOf(p) {
   return out.fh == null && out.sd == null ? null : out;
 }
 
-/** The account whose Claude Code sign-in an 'unsupported' account would share, by name. */
-function holderName(s) {
-  const p = s && s.problem === 'unsupported' ? deps.findProfile(s.holder) : null;
-  return p ? p.name : null;
+/** The accounts using the Claude Code sign-ins an 'unsupported' account's ~/.claude can have, by name. */
+function usersOf(s) {
+  if (!s || s.problem !== 'unsupported') return null;
+  const names = (s.users || []).map((id) => deps.findProfile(id)).filter(Boolean).map((p) => p.name);
+  return names.length ? names.join(' and ') : null;
 }
 
 function cliView(s) {
   if (!s) return { ok: false, problem: 'unknown' };
-  return { ok: Boolean(s.ok), problem: s.problem || null, email: s.status ? s.status.email : null, holder: holderName(s) };
+  return { ok: Boolean(s.ok), problem: s.problem || null, email: s.status ? s.status.email : null, holder: usersOf(s) };
 }
 
 function serverView(snap) {
@@ -211,8 +225,8 @@ function problemText(p, s) {
     case 'not-claude-ai': return `${name}’s Claude Code uses an API key. Remote Control needs a claude.ai sign-in: sign in again from Flock’s settings on your PC.`;
     case 'renew': return `${name}’s Claude Code sign-in may have been taken over by another account. Sign it in again from Flock’s settings on your PC.`;
     case 'unsupported': {
-      const other = holderName(s) || 'another account';
-      return `${name} uses the same ~/.claude as ${other}, and Claude Code keeps one sign-in per ~/.claude: ${other}’s. To start sessions as ${name}, give it its own ~/.claude in Flock on your PC.`;
+      const others = usersOf(s) || 'other accounts';
+      return `${name} shares its ~/.claude with ${others}, and there’s no Claude Code sign-in left for it. To start sessions as ${name}, give it its own ~/.claude in Flock on your PC.`;
     }
     default: return `Flock couldn’t check ${name}’s Claude Code sign-in.`;
   }
@@ -229,7 +243,7 @@ async function startServer(accountId, dir) {
   const launcher = cli.launcher();
   const spawnMode = opts().spawn === 'worktree' && folders.isGitRepo(dir) ? 'worktree' : 'same-dir';
   const snap = await remote.start({
-    account: p.id, folder: dir, launcher, env: cli.envFor(signIn.dir), spawnMode, permissionMode: opts().permissionMode,
+    account: p.id, folder: dir, launcher, env: cli.envFor(signIn), spawnMode, permissionMode: opts().permissionMode,
   });
   remember(p.id, dir);
   return serverView(snap);
@@ -269,7 +283,7 @@ async function continueSession(accountId, sessionId) {
   if (opts().permissionMode !== 'default') args.push('--permission-mode', opts().permissionMode);
   args.push('--remote-control', title);
   const snap = await remote.start({
-    kind: 'session', account: p.id, folder: s.cwd, launcher: cli.launcher(), env: cli.envFor(signIn.dir), args, title, session: s.id, forkId,
+    kind: 'session', account: p.id, folder: s.cwd, launcher: cli.launcher(), env: cli.envFor(signIn), args, title, session: s.id, forkId,
   });
   remember(p.id, s.cwd);
   return serverView(snap);
@@ -530,9 +544,18 @@ async function signIn(id) {
   const p = profileOr(id);
   const s = (await accountSignIns()).get(p.id);
   if (!s || s.problem === 'unsupported') throw new Error(problemText(p, s || {}));
-  const done = cli.openSignIn(s.dir, { title: `Flock: sign ${p.name} in to Claude Code`, account: p.name, scriptDir: deps.scriptDir });
-  signingIn.set(s.key, { id: p.id, dir: s.dir, done });
-  log('phone', 'sign-in window for', p.name, s.dir || '(default sign-in)');
+  const done = cli.openSignIn(s, { title: `Flock: sign ${p.name} in to Claude Code`, account: p.name, id: p.id, scriptDir: deps.scriptDir });
+  store.update((d) => { d.phone.pending[p.id] = { key: s.key, done }; });
+  log('phone', 'sign-in window for', p.name, s.key, s.store || s.dir || '');
+}
+
+/** Before an account leaves Flock: forgets which sign-ins were its, and signs out the one Flock kept for it. */
+async function forgetAccount(id) {
+  store.update((d) => {
+    delete d.phone.pending[id];
+    for (const k of Object.keys(d.phone.owners)) if (d.phone.owners[k] === id) delete d.phone.owners[k];
+  });
+  await cli.signOut(id, storeRoot());
 }
 
 // ── Lifecycle ───────────────────────────────────────────────────────────────
@@ -554,4 +577,4 @@ async function quit() {
   blocker = null;
 }
 
-module.exports = { init, view, setOptions, pair, cancelPairing, unpair, signIn, stopServer, windowOpened, openCopy, quit, refresh: () => cli.forget() };
+module.exports = { init, view, setOptions, pair, cancelPairing, unpair, signIn, forgetAccount, stopServer, windowOpened, openCopy, quit, refresh: () => cli.forget() };

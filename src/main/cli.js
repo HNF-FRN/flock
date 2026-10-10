@@ -5,16 +5,24 @@
 // it asks Claude Code (`claude auth status`) and opens a terminal window for
 // `claude auth login`.
 //
-// Claude Code keeps one sign-in per config folder: on Windows, the
-// .credentials.json in CLAUDE_CONFIG_DIR, or in ~/.claude when that isn't set.
-// An account with its own ~/.claude uses that folder's. The accounts that run
-// Claude Code with the same folder (those that share ~/.claude, or one
-// account's own folder through "Same as…") share its one sign-in, so only one
-// of them can use it: the one signed in to it from Flock, else the one in the
-// sign-in's organization, else the first. The others need their own ~/.claude.
-// (Setting CLAUDE_CONFIG_DIR to ~/.claude itself makes a second sign-in only on
-// macOS, where the Keychain keeps it apart. On Windows it is the same file,
-// so both accounts would run as whichever signed in last.)
+// Claude Code keeps a sign-in in two parts: the sign-in itself in the config
+// folder (CLAUDE_CONFIG_DIR, or ~/.claude when that isn't set), on Windows in
+// .credentials.json; and whose it is, in .claude.json in CLAUDE_CONFIG_DIR, or
+// in ~/.claude.json when it isn't set. CLAUDE_SECURESTORAGE_CONFIG_DIR moves
+// only the first part, to another folder.
+//
+// An account with its own ~/.claude uses that folder's sign-in. Two accounts
+// can share ~/.claude and still each have their own:
+// - one uses ~/.claude's own sign-in, the one Claude Code in a terminal uses;
+// - the second runs with CLAUDE_CONFIG_DIR set to ~/.claude itself, so the
+//   name goes to ~/.claude/.claude.json, and with its sign-in in a folder of
+//   Flock's (`storeRoot`\<account id>).
+// Both run with the same settings, skills, CLAUDE.md, memory and sessions.
+// Another account sharing ~/.claude, or sharing another account's own folder
+// ("Same as…"), would have to keep its name where another sign-in keeps its
+// own, so it needs its own ~/.claude. Which account uses which sign-in: the
+// one signed in to it from Flock, else the one in its organization, else the
+// first in the list.
 
 const fs = require('fs');
 const path = require('path');
@@ -24,6 +32,9 @@ const sessions = require('./sessions');
 const { HOME, APPDATA, pathKey, samePath } = require('./util');
 
 const STATUS_TTL = 5 * 60 * 1000;
+const DEFAULT_KEY = '(default)'; // ~/.claude's own sign-in
+const SECOND_KEY = '(second)'; // the second account's sign-in for ~/.claude
+const ID_RE = /^[A-Za-z0-9_-]{1,64}$/; // account ids, which name the second sign-in's folder
 
 function isFile(p) {
   try { return fs.statSync(p).isFile(); } catch { return false; }
@@ -74,45 +85,51 @@ function launcher() {
 }
 
 /**
- * The environment Claude Code runs with for one sign-in (`dir` null: the
- * default one). Variables of the session that may have started Flock, API
- * keys, other endpoints and other places to keep the sign-in are left out:
- * Remote Control needs this sign-in, a claude.ai one, talking to Anthropic
- * directly.
+ * The environment Claude Code runs with for one sign-in: `dir` and `store`
+ * are the CLAUDE_CONFIG_DIR and CLAUDE_SECURESTORAGE_CONFIG_DIR it sets (null:
+ * not set). Variables of the session that may have started Flock, API keys,
+ * other endpoints and other places to keep the sign-in are left out: Remote
+ * Control needs this sign-in, a claude.ai one, talking to Anthropic directly.
  */
-function envFor(dir) {
+function envFor({ dir, store } = {}) {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) {
     if (claude.NEVER_PASS_RE.test(k) || claude.SESSION_VAR_RE.test(k)) continue;
     env[k] = v;
   }
   if (dir) env.CLAUDE_CONFIG_DIR = dir;
+  if (store) env.CLAUDE_SECURESTORAGE_CONFIG_DIR = store;
   return env;
 }
 
 /** The CLAUDE_CONFIG_DIR an account's Claude Code runs with, or null to leave it unset (~/.claude). */
 function dirOf(profile, profiles) {
   const dir = claude.configDirOf(profile, profiles);
-  // ~/.claude named outright is still ~/.claude's one sign-in: run it as such.
+  // ~/.claude named outright is still ~/.claude: run it with ~/.claude's own sign-in.
   return dir && !samePath(dir, claude.DEFAULT_CONFIG_DIR) ? dir : null;
+}
+
+/** The second sign-in for ~/.claude, as the account `id` has it. */
+function secondOf(id, storeRoot) {
+  return { dir: claude.DEFAULT_CONFIG_DIR, store: path.join(storeRoot, id) };
 }
 
 // ── Sign-in status ──────────────────────────────────────────────────────────
 
 const statusCache = new Map(); // sign-in key -> { at, value, pending }
 
-function keyOf(dir) {
-  return dir ? pathKey(dir) : '(default)';
+function keyOf({ dir, store } = {}) {
+  return `${dir ? pathKey(dir) : DEFAULT_KEY}${store ? `|${pathKey(store)}` : ''}`;
 }
 
-function runStatus(dir) {
+function runStatus(signIn) {
   const l = launcher();
   if (!l) return Promise.resolve({ loggedIn: false, problem: 'no-cli' });
   return new Promise((resolve) => {
     let out = '';
     let c;
     try {
-      c = spawn(l.file, [...l.pre, 'auth', 'status', '--json'], { env: envFor(dir), windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
+      c = spawn(l.file, [...l.pre, 'auth', 'status', '--json'], { env: envFor(signIn), windowsHide: true, stdio: ['ignore', 'pipe', 'ignore'] });
     } catch {
       resolve({ loggedIn: false, problem: 'no-cli' });
       return;
@@ -138,13 +155,13 @@ function runStatus(dir) {
   });
 }
 
-/** What `claude auth status` says for one sign-in, asked at most every few minutes. */
-function status(dir, { fresh } = {}) {
-  const key = keyOf(dir);
+/** What `claude auth status` says for one sign-in ({ dir, store }), asked at most every few minutes. */
+function status(signIn, { fresh } = {}) {
+  const key = keyOf(signIn);
   const hit = statusCache.get(key);
   if (hit && hit.pending) return hit.pending;
   if (hit && hit.value && !fresh && Date.now() - hit.at < STATUS_TTL) return Promise.resolve(hit.value);
-  const pending = runStatus(dir).then((value) => {
+  const pending = runStatus(signIn).then((value) => {
     statusCache.set(key, { at: Date.now(), value });
     return value;
   });
@@ -158,78 +175,98 @@ function forget() {
 }
 
 /**
- * Whether the ~/.claude sign-in may be another account's than the one `claude
- * auth status` names (`st`). Signing in with CLAUDE_CONFIG_DIR set to
- * ~/.claude, as Flock 0.2.1 did for a second account, writes over that one
- * sign-in but keeps the name in ~/.claude/.claude.json, not ~/.claude.json.
- * When the two names differ, the sign-in is whichever was signed in last.
+ * Whether ~/.claude's own sign-in may be another account's than the one
+ * `claude auth status` names. Signing in with CLAUDE_CONFIG_DIR set to
+ * ~/.claude but without a folder of its own, as Flock 0.2.1 did for a second
+ * account, writes over that sign-in and keeps the name in
+ * ~/.claude/.claude.json instead of ~/.claude.json. When the two names differ,
+ * the sign-in is whichever was signed in last. (Only meaningful before Flock
+ * signs an account in to ~/.claude's second sign-in, which keeps its name there too.)
  */
-async function overwritten(st, opts) {
+async function overwritten(opts) {
+  const st = await status({}, opts);
   if (!st.loggedIn) return false;
-  const named = await status(claude.DEFAULT_CONFIG_DIR, opts);
+  const named = await status({ dir: claude.DEFAULT_CONFIG_DIR }, opts);
   return Boolean(named.loggedIn && (named.email || named.orgId) && (named.email !== st.email || named.orgId !== st.orgId));
 }
 
 /**
- * Each account's Claude Code sign-in: Map(id -> { dir, key, holder, status,
- * ok, problem }). `dir` is the CLAUDE_CONFIG_DIR it runs with (null: not
- * set) and `key` names that folder's sign-in. Of the accounts that share a
- * folder, only the `holder` (an account id) can use its sign-in; for the
- * others the problem is 'unsupported'. `owners` holds the accounts signed in
- * from Flock (key -> id). With `renew`, or when the ~/.claude sign-in may
- * have been written over and nobody signed in to it from Flock since, it has
- * to be signed in again before Flock trusts whose it is.
+ * Each account's Claude Code sign-in: Map(id -> { dir, store, key, users,
+ * status, ok, problem }). `dir` and `store` say how Claude Code runs for it
+ * (envFor); `key` names the sign-in in `owners`, which holds the accounts
+ * signed in from Flock (key -> id). An account that can't have a sign-in of
+ * its own gets the problem 'unsupported', and `users` lists the accounts that
+ * use the ones its folder can have. With `renew`, ~/.claude's own sign-in has
+ * to be signed in again before Flock trusts whose it is. Without `storeRoot`,
+ * ~/.claude has no second sign-in.
  */
-async function signIns(profiles, { owners = {}, renew = false } = {}, opts = {}) {
+async function signIns(profiles, { owners = {}, renew = false, storeRoot = null } = {}, opts = {}) {
   const folders = new Map(); // key -> { dir, members }
   for (const p of profiles) {
     const dir = dirOf(p, profiles);
-    const key = keyOf(dir);
+    const key = keyOf({ dir });
     if (!folders.has(key)) folders.set(key, { dir, members: [] });
     folders.get(key).members.push(p);
   }
   const out = new Map();
   await Promise.all([...folders].map(async ([key, { dir, members }]) => {
-    const st = await status(dir, opts);
-    const orgs = await Promise.all(members.map((p) => (st.orgId ? sessions.orgOf(p) : null)));
-    const doubt = !dir && (renew || (!owners[key] && await overwritten(st, opts)));
-    // Whose the sign-in is: the account signed in from Flock, else the one in
-    // its organization, else the first. Among several (accounts of one
-    // organization), the account whose own folder it is goes first.
-    let holder = members.find((p) => p.id === owners[key]);
-    if (!holder) {
-      const match = members.filter((p, i) => st.orgId && orgs[i] === st.orgId);
-      const own = (p) => Boolean(p.config && p.config.mode === 'own');
-      holder = match.find(own) || match[0] || members.find(own) || members[0];
-    }
-    members.forEach((p, i) => {
-      const s = { dir, key, holder: holder.id, status: p === holder ? st : null };
-      if (p !== holder) s.problem = 'unsupported';
-      // A sign-in to another organization than the account's sessions is
-      // another Claude account: its sessions would not reach this account's phone.
-      else if (!st.problem && orgs[i] && st.orgId !== orgs[i]) s.problem = 'other-account';
-      else if (!st.problem && doubt) s.problem = 'renew';
-      else s.problem = st.problem;
+    const st = await status({ dir }, opts);
+    const orgs = new Map(await Promise.all(members.map(async (p) => [p, await sessions.orgOf(p)])));
+    const own = (p) => Boolean(p.config && p.config.mode === 'own');
+    const first = (list) => list.find(own) || list[0] || null;
+    const owner = (k) => members.find((p) => p.id === owners[k]) || null;
+    const two = !dir && Boolean(storeRoot);
+
+    // Whose the folder's own sign-in is, and (~/.claude) whose the second one.
+    let holder = owner(key);
+    let second = two ? owner(SECOND_KEY) : null;
+    if (second === holder || (second && !ID_RE.test(second.id))) second = null;
+    const rest = () => members.filter((p) => p !== holder && p !== second);
+    if (!holder) holder = first(rest().filter((p) => st.orgId && orgs.get(p) === st.orgId));
+    // Signed out, the folder's own sign-in goes to the first account; signed in
+    // to another account (in a terminal, say), it goes to whoever is left over.
+    if (!holder && !st.loggedIn) holder = first(rest());
+    if (two && !second) second = rest().find((p) => ID_RE.test(p.id)) || null;
+    if (!holder) holder = first(rest());
+    const st2 = second ? await status(secondOf(second.id, storeRoot), opts) : null;
+    const users = [holder, second].filter(Boolean).map((p) => p.id);
+
+    for (const p of members) {
+      const use = p === holder ? { dir, store: null, key, st }
+        : p === second ? { ...secondOf(p.id, storeRoot), key: SECOND_KEY, st: st2 }
+          : null;
+      const s = { dir, store: null, key, users, status: null };
+      if (!use) s.problem = 'unsupported';
+      else {
+        Object.assign(s, { dir: use.dir, store: use.store, key: use.key, status: use.st });
+        const org = orgs.get(p);
+        // A sign-in to another organization than the account's sessions is
+        // another Claude account: its sessions would not reach this account's phone.
+        if (!use.st.problem && org && use.st.orgId !== org) s.problem = 'other-account';
+        else if (!use.st.problem && renew && use.key === DEFAULT_KEY) s.problem = 'renew';
+        else s.problem = use.st.problem;
+      }
       s.ok = !s.problem;
       out.set(p.id, s);
-    });
+    }
   }));
   return out;
 }
 
 /**
- * Opens a terminal window that runs `claude auth login` for this sign-in and
- * stays open, so the result can be read. The browser it opens is where the
- * account's claude.ai login goes. Returns the file that appears once the
- * sign-in succeeded (closing the window first leaves it out).
+ * Opens a terminal window that runs `claude auth login` for this sign-in
+ * ({ dir, store }) and stays open, so the result can be read. The browser it
+ * opens is where the account's claude.ai login goes. Returns the file that
+ * appears once the sign-in succeeded (closing the window first leaves it out).
  */
-function openSignIn(dir, { title, account, scriptDir }) {
+function openSignIn(signIn, { title, account, id, scriptDir }) {
   const l = launcher();
   if (!l) throw new Error('Claude Code isn’t installed on this PC. Install it from claude.com/claude-code, then try again.');
   const ascii = (s) => String(s || '').replace(/[^\x20-\x7e]/g, '').replace(/[&|<>^%"]/g, '');
   // A small script, so quoting stays simple and the window waits at the end.
-  const script = path.join(scriptDir, `sign-in-${ascii(account).replace(/[^A-Za-z0-9-]/g, '') || 'account'}.cmd`);
-  const done = script.replace(/\.cmd$/, '.done');
+  const name = String(id).replace(/[^A-Za-z0-9_-]/g, '') || 'account';
+  const script = path.join(scriptDir, `sign-in-${name}.cmd`);
+  const done = path.join(scriptDir, `sign-in-${name}.done`);
   try { fs.unlinkSync(done); } catch {}
   const lines = [
     '@echo off',
@@ -246,8 +283,9 @@ function openSignIn(dir, { title, account, scriptDir }) {
     'pause >nul',
   ];
   fs.mkdirSync(scriptDir, { recursive: true });
+  if (signIn.store) fs.mkdirSync(signIn.store, { recursive: true });
   fs.writeFileSync(script, `${lines.join('\r\n')}\r\n`, 'utf8');
-  const env = envFor(dir);
+  const env = envFor(signIn);
   const c = spawn('cmd.exe', ['/d', '/c', `start "" "${script}"`], {
     env, detached: true, stdio: 'ignore', windowsHide: true, windowsVerbatimArguments: true,
   });
@@ -256,4 +294,40 @@ function openSignIn(dir, { title, account, scriptDir }) {
   return done;
 }
 
-module.exports = { locate, launcher, envFor, status, forget, signIns, openSignIn };
+/**
+ * Signs out the second sign-in Flock keeps for an account (`claude auth
+ * logout`), then removes its folder. Its name goes with it: it runs with that
+ * folder as its config folder, so ~/.claude/.claude.json stays as it is.
+ */
+function signOut(id, storeRoot) {
+  if (!ID_RE.test(String(id)) || !storeRoot) return Promise.resolve();
+  const store = path.join(storeRoot, id);
+  if (!fs.existsSync(store)) return Promise.resolve();
+  const remove = () => { try { fs.rmSync(store, { recursive: true, force: true }); } catch {} };
+  const l = launcher();
+  if (!l) { remove(); return Promise.resolve(); }
+  return new Promise((resolve) => {
+    let c;
+    try {
+      c = spawn(l.file, [...l.pre, 'auth', 'logout'], { env: envFor({ dir: store, store }), windowsHide: true, stdio: 'ignore' });
+    } catch {
+      remove();
+      resolve();
+      return;
+    }
+    const timer = setTimeout(() => { try { c.kill(); } catch {} }, 20000);
+    let ended = false;
+    const end = () => {
+      if (ended) return;
+      ended = true;
+      clearTimeout(timer);
+      remove();
+      forget();
+      resolve();
+    };
+    c.on('error', end);
+    c.on('close', end);
+  });
+}
+
+module.exports = { DEFAULT_KEY, SECOND_KEY, locate, launcher, envFor, status, forget, overwritten, signIns, openSignIn, signOut };

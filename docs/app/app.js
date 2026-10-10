@@ -288,14 +288,14 @@
     'other-account': 'Claude Code on your PC is signed in to another Claude account here.',
     renew: 'Claude Code on your PC has to be signed in again here: another account may have taken over its sign-in.',
     'not-claude-ai': 'Claude Code uses an API key here; Remote Control needs a claude.ai sign-in.',
-    unsupported: 'It shares ~/.claude, and so its Claude Code sign-in, with another account. Give it its own ~/.claude in Flock.',
+    unsupported: 'It shares ~/.claude with other accounts, and there’s no Claude Code sign-in left for it. Give it its own ~/.claude in Flock.',
     'no-cli': 'Claude Code isn’t installed on your PC.',
     unknown: 'Flock couldn’t check Claude Code for this account.',
   };
 
   function problemOf(a) {
     const c = a.cli || {};
-    if (c.problem === 'unsupported' && c.holder) return `It shares ~/.claude, and so its Claude Code sign-in, with ${c.holder}. Give it its own ~/.claude in Flock.`;
+    if (c.problem === 'unsupported' && c.holder) return `It shares ~/.claude with ${c.holder}, and there’s no Claude Code sign-in left for it. Give it its own ~/.claude in Flock.`;
     return PROBLEMS[c.problem] || PROBLEMS.unknown;
   }
 

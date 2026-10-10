@@ -577,7 +577,7 @@
       case 'other-account': return [`Signed in to another account: ${c.email || '?'}`, 'err', 'Sign in again…'];
       case 'renew': return ['Sign in again: another account may have taken over this sign-in', 'warn', 'Sign in again…'];
       case 'not-claude-ai': return ['Uses an API key, not a claude.ai sign-in', 'warn', 'Sign in…'];
-      case 'unsupported': return [`Shares ~/.claude, and so its sign-in, with ${c.holder || 'another account'}. Give it its own ~/.claude to use it from your phone`, '', 'Edit…'];
+      case 'unsupported': return [`Shares ~/.claude with ${c.holder || 'other accounts'}: no Claude Code sign-in left for it. Give it its own ~/.claude to use it from your phone`, '', 'Edit…'];
       case 'no-cli': return ['Claude Code isn’t installed', 'err', null];
       default: return ['Checking…', '', null];
     }

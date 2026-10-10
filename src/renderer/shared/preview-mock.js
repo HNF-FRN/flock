@@ -68,7 +68,7 @@
       { id: 'p1', name: 'Work', color: '#38BDF8', cli: { ok: true, email: 'me@studio.co' } },
       { id: 'p2', name: 'Client A', color: '#4ADE80', cli: { ok: false, problem: 'signed-out' } },
       { id: 'p3', name: 'Research', color: '#C084FC', cli: { ok: false, problem: 'other-account', email: 'me@studio.co' } },
-      { id: 'p4', name: 'Side project', color: '#FACC15', cli: { ok: false, problem: 'unsupported', holder: 'Main' } },
+      { id: 'p4', name: 'Side project', color: '#FACC15', cli: { ok: false, problem: 'unsupported', holder: 'Main and Work' } },
     ],
     roots: [home, `${home}\\work`, `${home}\\Downloads`],
     rootsSet: false,

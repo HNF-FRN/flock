@@ -378,6 +378,7 @@ async function removeProfile(id, { deleteData } = {}) {
   const L = live.get(id) || {};
   if (L.pids && L.pids.length) await claude.quit(L.pids);
   await router.disarm(id);
+  await phone.forgetAccount(id).catch((e) => log('phone sign-out failed for', id, e.message));
   if (deleteData) {
     // Only this account's own folders (always named Claude-…), and only to the Recycle Bin.
     for (const dir of claude.allDirsOf(p.dataDir)) {
