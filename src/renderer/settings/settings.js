@@ -587,7 +587,7 @@
     if (s.status === 'asking') return ['Waiting for your answer on the phone', 'warn'];
     if (s.status === 'starting') return ['Starting…', 'warn'];
     if (s.status === 'ready') {
-      if (s.kind === 'session') return ['Remote Control on', 'ok'];
+      if (s.kind !== 'folder') return ['Remote Control on', 'ok'];
       const n = s.sessions.length;
       return [n ? `Running · ${n} session${n > 1 ? 's' : ''}` : 'Running', 'ok'];
     }
@@ -706,10 +706,10 @@
       r.className = 'pline';
       r.innerHTML = `<span class="pdot"></span><div class="pmain"><b></b><span class="psub"></span></div>`;
       r.querySelector('.pdot').style.background = s.color;
-      r.querySelector('b').textContent = `${s.kind === 'session' ? s.title || s.name : s.name} · ${s.accountName}`;
+      r.querySelector('b').textContent = `${s.title || s.name} · ${s.accountName}`;
       r.querySelector('b').title = s.folder;
       const sub = r.querySelector('.psub');
-      sub.textContent = s.kind === 'session' ? `${s.fork ? 'Copy of a session' : 'Session'} · ${text}` : text;
+      sub.textContent = s.kind === 'session' ? `${s.fork ? 'Copy of a session' : 'Session'} · ${text}` : s.kind === 'new' ? `New session · ${text}` : text;
       sub.className = `psub ${tone}`;
       if (['starting', 'asking', 'ready'].includes(s.status)) {
         const b = document.createElement('button');

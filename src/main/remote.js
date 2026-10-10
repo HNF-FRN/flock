@@ -7,6 +7,11 @@
 //            Code session reopened with Remote Control on (or a copy of it, when
 //            Claude's window may still be using it), so it carries on from the
 //            phone with all its history.
+//   new      `claude --remote-control <name>`: a new conversation under the
+//            name the phone gave it, with an id of Flock's (`conversation`) so
+//            it can be reopened later with --resume. (A server's own session
+//            can't be named reliably: a server brings back the folder's last
+//            session for a few hours, with that session's name.)
 // Claude Code asks what it asks in a terminal: once per sign-in whether to turn
 // Remote Control on, and whether to trust a folder it hasn't seen. Flock passes
 // those questions to the phone word for word and types only the phone's
@@ -43,6 +48,7 @@ let seq = 0;
 let onChange = () => {};
 
 const live = (s) => s.status === 'starting' || s.status === 'asking' || s.status === 'ready';
+const interactive = (s) => s.kind !== 'folder'; // one conversation in Claude Code's full-screen view, not a server
 
 // ── Reading the screen ──────────────────────────────────────────────────────
 
@@ -183,7 +189,7 @@ function look(s) {
     if (m && l.text && !STATUS_WORDS.has(l.text.toLowerCase())) s.titles.set(m[0], l.text);
   }
   const screen = s.text.slice(s.text.lastIndexOf('\f') + 1);
-  if (s.kind === 'session') {
+  if (interactive(s)) {
     const found = s.text.match(SESSION_URL_TEXT_RE);
     if (found) s.sessions = [{ url: found[found.length - 1], title: s.title }];
   } else if (READY_RE.test(screen)) {
@@ -197,7 +203,7 @@ function look(s) {
   s.links = s.links.filter((l) => l.frame === s.frame);
 
   if (!s.prompt && s.status !== 'ready') {
-    const failed = s.kind === 'session' && RC_FAILED_RE.exec(since(s));
+    const failed = interactive(s) && RC_FAILED_RE.exec(since(s));
     if (failed) {
       fail(s, failed[0].trim());
       return;
@@ -211,7 +217,7 @@ function look(s) {
       log('phone server', s.id, 'asks', q.kind);
     }
   }
-  const ready = s.kind === 'session' ? s.sessions.length > 0 || RC_ON_RE.test(s.text) : READY_RE.test(s.text) || s.envUrl;
+  const ready = interactive(s) ? s.sessions.length > 0 || RC_ON_RE.test(s.text) : READY_RE.test(s.text) || s.envUrl;
   if (!s.prompt && s.status !== 'ready' && ready) {
     s.status = 'ready';
     clearTimeout(s.timer);
@@ -234,6 +240,7 @@ function snapshot(s) {
     session: s.session || null,
     fork: Boolean(s.forkId),
     forkId: s.forkId || null,
+    conversation: s.conversation || null,
     status: s.status,
     prompt: p ? { id: p.id, kind: p.kind, ask: p.ask, text: p.text, folder: p.folder || null, options: p.mode === 'select' && p.kind === 'choice' ? p.options : null } : null,
     envUrl: s.envUrl || null,
@@ -270,19 +277,27 @@ function prefix(folder) {
   return (path.basename(folder) || 'flock').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'flock';
 }
 
+/** Whether `s` is already what start() was asked for. */
+function same(s, { kind, folder, title, session, conversation }) {
+  if (kind === 'folder') return pathKey(s.folder) === pathKey(folder);
+  if (kind === 'new') return s.conversation === conversation || (pathKey(s.folder) === pathKey(folder) && s.title === title);
+  return s.session === session;
+}
+
 /**
  * Starts Claude Code with Remote Control for `account` (a profile id), or
- * returns the one already running for the same folder (folder kind) or the
- * same session (session kind). `launcher` and `env` say how to run Claude Code
- * for that account's sign-in (see cli.js). The session kind takes the
- * arguments that reopen the conversation (`args`), its `title`, the Code
- * session's id (`session`) and, when it runs as a copy, the copy's id (`forkId`).
+ * returns the one already running for the same folder (folder kind), session
+ * (session kind) or name in a folder (new kind). `launcher` and `env` say how
+ * to run Claude Code for that account's sign-in (see cli.js). The session and
+ * new kinds take the arguments that open the conversation (`args`) and its
+ * `title`; the session kind also the Code session's id (`session`) and, when
+ * it runs as a copy, the copy's id (`forkId`); the new kind the conversation's
+ * id (`conversation`).
  */
-async function start({ kind = 'folder', account, folder, launcher, env, spawnMode = 'same-dir', permissionMode = 'default', args: sessionArgs, title, session, forkId }) {
+async function start({ kind = 'folder', account, folder, launcher, env, spawnMode = 'same-dir', permissionMode = 'default', args: sessionArgs, title, session, forkId, conversation }) {
   prune();
   for (const s of servers.values()) {
-    if (!live(s) || s.account !== account || s.kind !== kind) continue;
-    if (kind === 'folder' ? pathKey(s.folder) === pathKey(folder) : s.session === session) return snapshot(s);
+    if (live(s) && s.account === account && s.kind === kind && same(s, { kind, folder, title, session, conversation })) return snapshot(s);
   }
   if ([...servers.values()].filter(live).length >= MAX_LIVE) {
     throw new Error(`Flock already runs ${MAX_LIVE} sessions for your phone. Stop one first.`);
@@ -300,6 +315,7 @@ async function start({ kind = 'folder', account, folder, launcher, env, spawnMod
     title: title || null,
     session: session || null,
     forkId: forkId || null,
+    conversation: conversation || null,
     status: 'starting',
     startedAt: Date.now(),
     carry: '',
@@ -320,7 +336,8 @@ async function start({ kind = 'folder', account, folder, launcher, env, spawnMod
     timer: null,
   };
   servers.set(s.id, s);
-  log('phone server', s.id, 'start', kind, folder, kind === 'folder' ? spawnMode : forkId ? 'as a copy' : 'in place', permissionMode);
+  const how = { folder: spawnMode, session: forkId ? 'as a copy' : 'in place', new: args.includes('--resume') ? 'reopened' : 'new' }[kind];
+  log('phone server', s.id, 'start', kind, folder, how, permissionMode, s.title ? `"${s.title}"` : '');
   onChange(snapshot(s));
   s.timer = setTimeout(() => fail(s, s.lastError || 'Claude Code didn’t get going in time.'), START_TIMEOUT);
   try {

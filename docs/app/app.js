@@ -375,14 +375,14 @@
 
   function serverCard(s) {
     const tone = { ready: 'ok', asking: 'warn', starting: 'warn', failed: 'err', stopped: '' }[s.status];
-    const reopened = s.kind === 'session';
+    const one = s.kind !== 'folder'; // one conversation, not a server
     const text = s.status === 'ready'
-      ? reopened ? 'Remote Control on' : s.sessions.length ? `Running · ${s.sessions.length} session${s.sessions.length > 1 ? 's' : ''}` : 'Running'
+      ? one ? 'Remote Control on' : s.sessions.length ? `Running · ${s.sessions.length} session${s.sessions.length > 1 ? 's' : ''}` : 'Running'
       : { asking: 'Claude Code asks you something', starting: 'Starting…', failed: 'Didn’t start', stopped: 'Stopped' }[s.status];
     return h('button', { class: 'card srv', style: `--c:${s.color}`, onclick: () => go({ v: 'server', id: s.id }) },
       h('span', { class: 'srv-dot' }),
       h('div', { class: 'card-main' },
-        h('b', { text: reopened ? s.title || s.name : s.name }),
+        h('b', { text: s.title || s.name }),
         h('span', { class: `sub ${tone}`, text: `${s.accountName} · ${text}` })),
       icon('chev'));
   }
@@ -590,14 +590,21 @@
     setTimeout(() => name.focus(), 250);
   }
 
+  /** The field that names a session in the Claude app (80 characters at most, as Flock on the PC takes it). */
+  function nameField(value, placeholder) {
+    return h('input', { type: 'text', value: value || null, placeholder, maxlength: '80', autocomplete: 'off', autocapitalize: 'sentences', spellcheck: 'true', enterkeyhint: 'go' });
+  }
+
   function confirmStart(a, dir, fresh) {
     const go_ = h('button', { class: 'btn primary grow', text: 'Start Claude here' });
+    const name = nameField(null, 'Optional: otherwise named from your first message');
     const err = h('p', { class: 'note err hidden' });
+    name.addEventListener('keydown', (e) => { if (e.key === 'Enter') go_.click(); });
     go_.addEventListener('click', async () => {
       err.classList.add('hidden');
       busy(go_, true, 'Starting…');
       try {
-        const s = await request('start', { account: a.id, path: dir });
+        const s = await request('start', { account: a.id, path: dir, name: name.value.trim() || null });
         S.servers.set(s.id, s);
         closeSheet();
         go({ v: 'server', id: s.id });
@@ -622,6 +629,7 @@
       h('div', { class: 'sheet-head' }, mascot(a.color, 'awake', 'sheet-m'), h('h3', { text: fresh ? `Start Claude in ${base(dir)}?` : base(dir) })),
       h('p', { class: 'note mono', text: dir }),
       h('p', { class: 'lead', text: `Claude Code starts in this folder on your PC with ${a.name}’s account. You’ll get a link that opens it in the Claude app.` }),
+      h('label', { class: 'field' }, h('span', { text: 'Session name' }), name),
       err,
       h('div', { class: 'sheet-foot' }, h('button', { class: 'btn secondary', text: 'Cancel', onclick: closeSheet }), go_),
       more);
@@ -634,12 +642,14 @@
    */
   function continueSheet(a, s, windowOpen) {
     const btn = h('button', { class: 'btn primary grow', text: 'Continue on phone' });
+    const name = nameField(s.title, base(s.cwd));
     const err = h('p', { class: 'note err hidden' });
+    name.addEventListener('keydown', (e) => { if (e.key === 'Enter') btn.click(); });
     btn.addEventListener('click', async () => {
       err.classList.add('hidden');
       busy(btn, true, 'Starting…');
       try {
-        const sv = await request('continue', { account: a.id, session: s.id });
+        const sv = await request('continue', { account: a.id, session: s.id, name: name.value.trim() || null });
         S.servers.set(sv.id, sv);
         sessionCache.delete(a.id);
         closeSheet();
@@ -656,6 +666,7 @@
       h('p', { class: 'lead', text: windowOpen
         ? `${a.name}’s Claude window is open on your PC and may still be using this session, so your phone carries on with a copy of it, with everything said so far. The window keeps the original.`
         : `Your phone carries on with this session itself, with everything said so far. When you open ${a.name}’s Claude window on your PC again, it goes back there.` }),
+      h('label', { class: 'field' }, h('span', { text: 'Name in the Claude app' }), name),
       err,
       h('div', { class: 'sheet-foot' }, h('button', { class: 'btn secondary', text: 'Cancel', onclick: closeSheet }), btn));
   }
@@ -713,8 +724,9 @@
       return page;
     }
     const a = S.accounts.find((x) => x.id === s.account);
-    const reopened = s.kind === 'session';
-    page.append(topbar(reopened ? s.title || s.name : s.name, { back: true, sub: `${s.accountName} · ${short(s.folder, 38)}` }));
+    const reopened = s.kind === 'session'; // a session from the PC, carried on
+    const one = s.kind !== 'folder'; // one conversation (reopened, or new with a name), not a server
+    page.append(topbar(s.title || s.name, { back: true, sub: `${s.accountName} · ${short(s.folder, 38)}` }));
     const mood = { starting: 'launching', asking: 'alert', ready: 'awake', failed: 'error', stopped: 'asleep' }[s.status];
     const hero = h('div', { class: 'hero', style: `--c:${s.color}` }, mascot(s.color, mood, 'hero-m'));
     page.append(hero);
@@ -734,7 +746,7 @@
         page.append(h('p', { class: 'note center', text: s.fork
           ? `This is a copy: ${s.accountName}’s Claude window keeps the original. Back at your PC, Flock’s settings can open the copy in the window.`
           : `When you open ${s.accountName}’s Claude window on your PC, the session goes back there.` }));
-      } else if (s.sessions.length) {
+      } else if (!one && s.sessions.length) {
         page.append(h('h2', { text: 'Sessions in this folder' }));
         page.append(h('div', { class: 'cards' }, s.sessions.map((x) => h('a', { class: 'card', href: x.url, target: '_blank', rel: 'noopener noreferrer' },
           mascot(s.color, 'awake', 'acct-m'),
@@ -749,10 +761,10 @@
       page.append(h('p', { class: 'note err', text: s.error || 'Claude Code stopped.' }));
       if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s) }, icon('refresh'), 'Try again'));
     } else {
-      page.append(h('p', { class: 'lead center', text: reopened
+      page.append(h('p', { class: 'lead center', text: one
         ? 'Stopped on your PC. The conversation is saved; carry on with it again any time.'
         : 'Stopped. Its sessions can’t be reached until it runs again.' }));
-      if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s) }, icon('refresh'), reopened ? 'Continue it again' : 'Start it again'));
+      if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s) }, icon('refresh'), one ? 'Continue it again' : 'Start it again'));
     }
 
     if (['starting', 'asking', 'ready'].includes(s.status)) {
@@ -765,8 +777,8 @@
     busy(btn, true, 'Starting…');
     try {
       const s = old.kind === 'session'
-        ? await request('continue', { account: a.id, session: old.session })
-        : await request('start', { account: a.id, path: old.folder });
+        ? await request('continue', { account: a.id, session: old.session, name: old.title })
+        : await request('start', { account: a.id, path: old.folder, name: old.title, conversation: old.conversation });
       S.servers.set(s.id, s);
       go({ v: 'server', id: s.id }, true);
     } catch (e) {

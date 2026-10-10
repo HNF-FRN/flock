@@ -232,7 +232,35 @@ function problemText(p, s) {
   }
 }
 
-async function startServer(accountId, dir) {
+/**
+ * A session's name, from the phone or a session's title, as it can go on a
+ * command line (through cmd.exe, with npm's claude.cmd): one line, without
+ * quotes or cmd.exe's special characters, 80 characters at most; null if
+ * nothing is left.
+ */
+function sessionName(raw) {
+  if (typeof raw !== 'string') return null;
+  const s = raw.replace(/["%^&|<>\x00-\x1f\x7f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80).trim();
+  return s || null;
+}
+
+/** Whether Claude Code, run with the config folder `dir`, keeps a conversation `id`: projects\<folder>\<id>.jsonl. */
+function hasConversation(dir, id) {
+  const root = path.join(dir || claude.DEFAULT_CONFIG_DIR, 'projects');
+  let names = [];
+  try { names = fs.readdirSync(root); } catch { return false; }
+  return names.some((n) => {
+    try { return fs.statSync(path.join(root, n, `${id}.jsonl`)).isFile(); } catch { return false; }
+  });
+}
+
+/**
+ * Starts Claude Code with Remote Control in a folder. With a `name`, a new
+ * conversation under that name; or, given the id of one started that way
+ * (`conversation`) that Claude Code kept, that one again. Without a name, a
+ * server (`claude remote-control`) whose session Claude Code names itself.
+ */
+async function startServer(accountId, dir, name, conversation) {
   const p = profileOr(accountId);
   if (!dir || !folders.isDir(dir)) throw new Error('That folder doesn’t exist on your PC any more.');
   if (!folders.allowed(dir, await rootList(), await everyRecent())) {
@@ -241,10 +269,20 @@ async function startServer(accountId, dir) {
   const signIn = (await accountSignIns()).get(p.id);
   if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
   const launcher = cli.launcher();
-  const spawnMode = opts().spawn === 'worktree' && folders.isGitRepo(dir) ? 'worktree' : 'same-dir';
-  const snap = await remote.start({
-    account: p.id, folder: dir, launcher, env: cli.envFor(signIn), spawnMode, permissionMode: opts().permissionMode,
-  });
+  const env = cli.envFor(signIn);
+  const title = sessionName(name);
+  let snap;
+  if (title) {
+    const again = typeof conversation === 'string' && sessions.UUID_RE.test(conversation) && hasConversation(signIn.dir, conversation);
+    const id = again ? conversation : crypto.randomUUID();
+    const args = again ? ['--resume', id] : ['--session-id', id];
+    if (opts().permissionMode !== 'default') args.push('--permission-mode', opts().permissionMode);
+    args.push('--remote-control', title);
+    snap = await remote.start({ kind: 'new', account: p.id, folder: dir, launcher, env, args, title, conversation: id });
+  } else {
+    const spawnMode = opts().spawn === 'worktree' && folders.isGitRepo(dir) ? 'worktree' : 'same-dir';
+    snap = await remote.start({ account: p.id, folder: dir, launcher, env, spawnMode, permissionMode: opts().permissionMode });
+  }
   remember(p.id, dir);
   return serverView(snap);
 }
@@ -265,9 +303,10 @@ async function listSessions(accountId, dir) {
  * carries on from the phone with all its history. When the account's Claude
  * window is open it may still be using the session, and two programs writing
  * one conversation would split it, so the phone then gets a copy (a fork with
- * an id of Flock's choosing, which Claude's window can open later).
+ * an id of Flock's choosing, which Claude's window can open later). It shows
+ * as `name` in the Claude app, else under the session's own title.
  */
-async function continueSession(accountId, sessionId) {
+async function continueSession(accountId, sessionId, name) {
   const p = profileOr(accountId);
   const s = sessionId ? await sessions.find(p, sessionId) : null;
   if (!s || !s.cli) throw new Error('Flock can’t find that session on your PC any more.');
@@ -275,7 +314,7 @@ async function continueSession(accountId, sessionId) {
   const signIn = (await accountSignIns()).get(p.id);
   if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
   const forkId = deps.isRunning(p.id) ? crypto.randomUUID() : null;
-  const title = (s.title || path.basename(s.cwd)).replace(/[\r\n\t]+/g, ' ').slice(0, 80);
+  const title = sessionName(name) || sessionName(s.title) || sessionName(path.basename(s.cwd)) || 'Claude Code';
   const args = ['--resume', s.cli];
   if (forkId) args.push('--fork-session', '--session-id', forkId);
   if (s.model) args.push('--model', s.model);
@@ -360,9 +399,9 @@ async function handle(dev, msg) {
     case 'state': return state();
     case 'folders': return listFolders(msg.account, folderArg(msg.path));
     case 'mkdir': return makeFolder(msg.account, folderArg(msg.parent), msg.name, msg.git);
-    case 'start': return startServer(msg.account, folderArg(msg.path));
+    case 'start': return startServer(msg.account, folderArg(msg.path), msg.name, msg.conversation);
     case 'sessions': return listSessions(msg.account, folderArg(msg.path));
-    case 'continue': return continueSession(msg.account, typeof msg.session === 'string' ? msg.session : null);
+    case 'continue': return continueSession(msg.account, typeof msg.session === 'string' ? msg.session : null, msg.name);
     case 'answer': return answer(msg.server, msg.prompt, { yes: Boolean(msg.yes), option: msg.option });
     case 'stop': return stopServer(msg.server);
     case 'forget':
