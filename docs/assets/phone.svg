@@ -1,0 +1,300 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="780" viewBox="0 0 1280 780" role="img" aria-label="The Flock phone app: pick an account, pick a project or one of its sessions, and open it in the Claude app">
+<title>The Flock phone app: pick an account, pick a project or one of its sessions, and open it in the Claude app</title>
+<style>
+  .m .bd { animation: bob 3.4s ease-in-out infinite; animation-delay: var(--d); }
+  .m .gl { animation: glow 2.6s ease-in-out infinite; animation-delay: var(--d); }
+  .m .ey { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; animation-delay: var(--d); }
+  @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.1px) } }
+  @keyframes glow { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1) } 96% { transform: scaleY(.12) } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important } .flow { display: none } }</style>
+<defs>
+    <radialGradient id="pP" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(204.8 39) scale(640 858.0000000000001)"><stop offset="0" stop-color="#3B2F63" stop-opacity=".85"/><stop offset="1" stop-color="#3B2F63" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pT" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1152 780) scale(640 858.0000000000001)"><stop offset="0" stop-color="#1D4A5C" stop-opacity=".8"/><stop offset="1" stop-color="#1D4A5C" stop-opacity="0"/></radialGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#fff" fill-opacity=".045"/></pattern>
+    <clipPath id="card"><rect width="1280" height="780" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="1280" height="780" fill="#08090B"/>
+    <rect width="1280" height="780" fill="url(#pP)"/>
+    <rect width="1280" height="780" fill="url(#pT)"/>
+    <rect width="1280" height="780" fill="url(#dots)"/>
+  </g>
+  <rect x=".5" y=".5" width="1279" height="779" rx="27.5" fill="none" stroke="#fff" stroke-opacity=".07"/>
+  <text x="120" y="64" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">FLOCK FROM YOUR PHONE</text>
+  <text x="120" y="98" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="26" font-weight="650" fill="#F5F6F8">Start Claude Code on your PC, or carry on with a session, from anywhere.</text>
+  <circle cx="133" cy="136" r="13" fill="none" stroke="#fff" stroke-opacity=".25"/>
+  <text x="133" y="141" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">1</text>
+  <text x="156" y="141.5" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Pick an account</text>
+  <circle cx="503" cy="136" r="13" fill="none" stroke="#fff" stroke-opacity=".25"/>
+  <text x="503" y="141" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">2</text>
+  <text x="526" y="141.5" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Pick a project, or a session</text>
+  <circle cx="873" cy="136" r="13" fill="none" stroke="#fff" stroke-opacity=".25"/>
+  <text x="873" y="141" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">3</text>
+  <text x="896" y="141.5" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Open it in the Claude app</text>
+  <g>
+  <defs><clipPath id="ph11"><rect x="130" y="170" width="280" height="570" rx="32"/></clipPath></defs>
+  <rect x="120" y="160" width="300" height="590" rx="42" fill="#050506" stroke="#fff" stroke-opacity=".14"/>
+  <rect x="130" y="170" width="280" height="570" rx="32" fill="#0B0C0E"/>
+  <g clip-path="url(#ph11)">
+    <text x="156" y="197" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#F5F6F8">9:41</text>
+    <circle cx="270" cy="192" r="6" fill="#000" stroke="#fff" stroke-opacity=".08"/>
+    <g fill="#F5F6F8">
+      <rect x="348" y="190" width="3" height="6" rx="1"/><rect x="353" y="188" width="3" height="8" rx="1"/><rect x="358" y="186" width="3" height="10" rx="1"/>
+      <rect x="366" y="186" width="20" height="10" rx="3" fill="none" stroke="#F5F6F8" stroke-opacity=".6"/><rect x="368" y="188" width="13" height="6" rx="1.5"/>
+    </g>
+    <g class="m " transform="translate(146 220) scale(1)" style="--d:-1.4s">
+  <defs>
+    <linearGradient id="m16b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f7f9"/><stop offset="1" stop-color="#dddddf"/></linearGradient>
+    <radialGradient id="m16h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m16g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fbfbfc" stop-opacity=".9"/><stop offset="1" stop-color="#fbfbfc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m16s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#7b7b7c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#7b7b7c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#7b7b7c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m16g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#fbfbfc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m16b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m16h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="198" y="237" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="17" font-weight="650" fill="#F5F6F8">Flock</text>
+    <text x="198" y="255" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="12" fill="#9398A1">Your PC</text>
+    <rect x="318" y="228" width="76" height="24" rx="12" fill="#22C55E" fill-opacity=".14"/>
+    <circle cx="331" cy="240" r="3.5" fill="#22C55E"/>
+    <text x="340" y="244.5" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="12" font-weight="600" fill="#86EFAC">Online</text>
+    <text x="150" y="294" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="11" letter-spacing="1.5" fill="#9398A1">START A SESSION IN…</text>
+    <rect x="144" y="308" width="252" height="68" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="144" y="318" width="3" height="48" rx="1.5" fill="#D97757"/>
+    <g class="m " transform="translate(156 320) scale(1.1)" style="--d:0s">
+  <defs>
+    <linearGradient id="m12b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#df8d72"/><stop offset="1" stop-color="#c36b4e"/></linearGradient>
+    <radialGradient id="m12h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m12g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0c9bc" stop-opacity=".9"/><stop offset="1" stop-color="#f0c9bc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m12s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#6d3c2c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#6d3c2c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#6d3c2c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m12g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#f0c9bc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m12b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m12h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="210" y="337" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Main</text>
+    <text x="210" y="359" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">5h</text>
+    <rect x="227.6" y="354" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="227.6" y="354" width="3" height="4.5" rx="2.25" fill="#E9EBEE"/>
+    <text x="260.6" y="359" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">9%</text>
+    <text x="285.1" y="359" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">Week</text>
+    <rect x="315.3" y="354" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="315.3" y="354" width="10.08" height="4.5" rx="2.25" fill="#E9EBEE"/>
+    <text x="348.3" y="359" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">36%</text>
+    <path d="M380 337l5 5-5 5" fill="none" stroke="#6B7079" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="144" y="386" width="252" height="68" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="144" y="396" width="3" height="48" rx="1.5" fill="#38BDF8"/>
+    <g class="m " transform="translate(156 398) scale(1.1)" style="--d:-0.7s">
+  <defs>
+    <linearGradient id="m13b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58c8f9"/><stop offset="1" stop-color="#32aadf"/></linearGradient>
+    <radialGradient id="m13h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m13g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#afe5fc" stop-opacity=".9"/><stop offset="1" stop-color="#afe5fc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m13s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#1c5f7c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m13g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#afe5fc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m13b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m13h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="210" y="415" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Work</text>
+    <text x="210" y="437" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">5h</text>
+    <rect x="227.6" y="432" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="227.6" y="432" width="28" height="4.5" rx="2.25" fill="#F4505E"/>
+    <text x="260.6" y="437" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#FF8D97">100%</text>
+    <path d="M380 415l5 5-5 5" fill="none" stroke="#6B7079" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="144" y="464" width="252" height="68" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="144" y="474" width="3" height="48" rx="1.5" fill="#4ADE80"/>
+    <g class="m " transform="translate(156 476) scale(1.1)" style="--d:-1.4s">
+  <defs>
+    <linearGradient id="m14b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67e394"/><stop offset="1" stop-color="#43c873"/></linearGradient>
+    <radialGradient id="m14h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m14g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#b7f2cc" stop-opacity=".9"/><stop offset="1" stop-color="#b7f2cc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m14s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#256f40"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#256f40"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#256f40" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m14g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#b7f2cc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m14b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m14h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="210" y="493" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Client A</text>
+    <text x="210" y="515" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">5h</text>
+    <rect x="227.6" y="510" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="227.6" y="510" width="11.76" height="4.5" rx="2.25" fill="#E9EBEE"/>
+    <text x="260.6" y="515" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">42%</text>
+    <text x="291.6" y="515" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">Week</text>
+    <rect x="321.8" y="510" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="321.8" y="510" width="17.08" height="4.5" rx="2.25" fill="#E9EBEE"/>
+    <text x="354.8" y="515" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">61%</text>
+    <path d="M380 493l5 5-5 5" fill="none" stroke="#6B7079" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="144" y="542" width="252" height="68" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="144" y="552" width="3" height="48" rx="1.5" fill="#C084FC"/>
+    <g class="m " transform="translate(156 554) scale(1.1)" style="--d:-2.0999999999999996s">
+  <defs>
+    <linearGradient id="m15b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ca98fc"/><stop offset="1" stop-color="#ad77e3"/></linearGradient>
+    <radialGradient id="m15h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m15g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#e6cefe" stop-opacity=".9"/><stop offset="1" stop-color="#e6cefe" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m15s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#60427e"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#60427e"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#60427e" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m15g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#e6cefe"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m15b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m15h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="210" y="571" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Research</text>
+    <text x="210" y="593" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">5h</text>
+    <rect x="227.6" y="588" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="227.6" y="588" width="3.36" height="4.5" rx="2.25" fill="#E9EBEE"/>
+    <text x="260.6" y="593" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">12%</text>
+    <text x="291.6" y="593" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">Week</text>
+    <rect x="321.8" y="588" width="28" height="4.5" rx="2.25" fill="#fff" fill-opacity=".1"/>
+    <rect x="321.8" y="588" width="5.6" height="4.5" rx="2.25" fill="#E9EBEE"/>
+    <text x="354.8" y="593" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11" fill="#9398A1">20%</text>
+    <path d="M380 571l5 5-5 5" fill="none" stroke="#6B7079" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</g>
+  <g>
+  <defs><clipPath id="ph17"><rect x="500" y="170" width="280" height="570" rx="32"/></clipPath></defs>
+  <rect x="490" y="160" width="300" height="590" rx="42" fill="#050506" stroke="#fff" stroke-opacity=".14"/>
+  <rect x="500" y="170" width="280" height="570" rx="32" fill="#0B0C0E"/>
+  <g clip-path="url(#ph17)">
+    <text x="526" y="197" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#F5F6F8">9:41</text>
+    <circle cx="640" cy="192" r="6" fill="#000" stroke="#fff" stroke-opacity=".08"/>
+    <g fill="#F5F6F8">
+      <rect x="718" y="190" width="3" height="6" rx="1"/><rect x="723" y="188" width="3" height="8" rx="1"/><rect x="728" y="186" width="3" height="10" rx="1"/>
+      <rect x="736" y="186" width="20" height="10" rx="3" fill="none" stroke="#F5F6F8" stroke-opacity=".6"/><rect x="738" y="188" width="13" height="6" rx="1.5"/>
+    </g>
+    <rect x="516" y="220" width="40" height="40" rx="12" fill="#fff" fill-opacity=".06"/><path d="M536 234l-6 6 6 6" fill="none" stroke="#F5F6F8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="568" y="237" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="17" font-weight="650" fill="#F5F6F8">Main</text>
+    <text x="568" y="255" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="12" fill="#9398A1">Start a session or continue one</text>
+    
+    <rect x="514" y="274" width="252" height="44" rx="14" fill="#0E0F11" stroke="#fff" stroke-opacity=".07"/>
+    
+    <text x="558.6666666666666" y="301" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#9398A1">Recent</text><rect x="599.3333333333334" y="278" width="81.33333333333333" height="36" rx="10" fill="#1D1F23"/>
+    <text x="640" y="301" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#F5F6F8">Sessions</text>
+    <text x="721.3333333333333" y="301" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#9398A1">Browse</text>
+    <text x="520" y="346" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#E9EBEE">studio-site</text>
+    <text x="602.3" y="346" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="10.5" fill="#6B7079">~\work\studio-site</text>
+    <rect x="514" y="358" width="252" height="60" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="526" y="370" width="36" height="36" rx="11" fill="#fff" fill-opacity=".06"/><path d="M535 382.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H542.2L538.5 394v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="574" y="385" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#F5F6F8">Hero scroll animation p…</text>
+    <text x="574" y="403" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11.5" fill="#86EFAC">On your phone now</text>
+    <rect x="514" y="426" width="252" height="60" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="526" y="438" width="36" height="36" rx="11" fill="#fff" fill-opacity=".06"/><path d="M535 450.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H542.2L538.5 462v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="574" y="453" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#F5F6F8">Case study page layout</text>
+    <text x="574" y="471" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11.5" fill="#9398A1">38 min ago</text>
+    <text x="520" y="516" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#E9EBEE">client-portal</text>
+    <text x="616.9" y="516" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="10.5" fill="#6B7079">~\work\client-portal</text>
+    <rect x="514" y="528" width="252" height="60" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="526" y="540" width="36" height="36" rx="11" fill="#fff" fill-opacity=".06"/><path d="M535 552.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H542.2L538.5 564v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="574" y="555" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#F5F6F8">Pricing table redesign</text>
+    <text x="574" y="573" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11.5" fill="#9398A1">1 h ago</text>
+    <rect x="514" y="596" width="252" height="60" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="526" y="608" width="36" height="36" rx="11" fill="#fff" fill-opacity=".06"/><path d="M535 620.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H542.2L538.5 632v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="574" y="623" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#F5F6F8">Auth middleware refactor</text>
+    <text x="574" y="641" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="11.5" fill="#9398A1">3 h ago</text>
+  </g>
+</g>
+  <g>
+  <defs><clipPath id="ph18"><rect x="870" y="170" width="280" height="570" rx="32"/></clipPath></defs>
+  <rect x="860" y="160" width="300" height="590" rx="42" fill="#050506" stroke="#fff" stroke-opacity=".14"/>
+  <rect x="870" y="170" width="280" height="570" rx="32" fill="#0B0C0E"/>
+  <g clip-path="url(#ph18)">
+    <text x="896" y="197" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#F5F6F8">9:41</text>
+    <circle cx="1010" cy="192" r="6" fill="#000" stroke="#fff" stroke-opacity=".08"/>
+    <g fill="#F5F6F8">
+      <rect x="1088" y="190" width="3" height="6" rx="1"/><rect x="1093" y="188" width="3" height="8" rx="1"/><rect x="1098" y="186" width="3" height="10" rx="1"/>
+      <rect x="1106" y="186" width="20" height="10" rx="3" fill="none" stroke="#F5F6F8" stroke-opacity=".6"/><rect x="1108" y="188" width="13" height="6" rx="1.5"/>
+    </g>
+    <rect x="886" y="220" width="40" height="40" rx="12" fill="#fff" fill-opacity=".06"/><path d="M906 234l-6 6 6 6" fill="none" stroke="#F5F6F8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="938" y="237" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="17" font-weight="650" fill="#F5F6F8">Pricing table redesign</text>
+    <text x="938" y="255" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="12" fill="#9398A1">Work · ~\work\client-portal</text>
+    
+    <defs><radialGradient id="hg19" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#38BDF8" stop-opacity=".32"/><stop offset="1" stop-color="#38BDF8" stop-opacity="0"/></radialGradient></defs>
+    <ellipse cx="1010" cy="360" rx="130" ry="80" fill="url(#hg19)"/>
+    <g class="m " transform="translate(955 305) scale(2.75)" style="--d:-0.6s">
+  <defs>
+    <linearGradient id="m20b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58c8f9"/><stop offset="1" stop-color="#32aadf"/></linearGradient>
+    <radialGradient id="m20h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m20g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#afe5fc" stop-opacity=".9"/><stop offset="1" stop-color="#afe5fc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m20s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#1c5f7c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m20g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#afe5fc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m20b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m20h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="1010" y="460" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#E9EBEE">Remote Control is on. Open it</text>
+    <text x="1010" y="481" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#E9EBEE">in the Claude app to carry on.</text>
+    <rect x="886" y="504" width="248" height="46" rx="16" fill="#F5F6F8" fill-opacity="1"/>
+    <path d="M944.4 520h6v6M950.4 520l-7.5 7.5M947.4 529v3.5c0 .8-.7 1.5-1.5 1.5H2.5c-.8 0-1.5-.7-1.5-1.5V5.5C1 4.7 1.7 4 2.5 4H6" fill="none" stroke="#0B0C0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="961.4" y="532.5" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14.5" font-weight="600" fill="#0B0C0E">Open the session</text>
+    <text x="1010" y="580" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="12" fill="#9398A1">It belongs to Work’s Claude account:</text>
+    <text x="1010" y="597" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="12" fill="#9398A1">the Claude app has to be signed in to it.</text>
+    <rect x="886" y="620" width="248" height="46" rx="16" fill="#F4505E" fill-opacity=".16"/>
+    <text x="1010" y="648" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14.5" font-weight="600" fill="#FF8D97">Stop</text>
+  </g>
+</g>
+</svg>

@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="560" viewBox="0 0 1280 560" role="img" aria-label="How the phone reaches the PC: Flock's encrypted messages go through the ntfy.sh relay to Flock, which starts Claude Code; the conversation goes through Anthropic's Remote Control to the Claude app">
+<title>How the phone reaches the PC: Flock's encrypted messages go through the ntfy.sh relay to Flock, which starts Claude Code; the conversation goes through Anthropic's Remote Control to the Claude app</title>
+<style>
+  .m .bd { animation: bob 3.4s ease-in-out infinite; animation-delay: var(--d); }
+  .m .gl { animation: glow 2.6s ease-in-out infinite; animation-delay: var(--d); }
+  .m .ey { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; animation-delay: var(--d); }
+  @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.1px) } }
+  @keyframes glow { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1) } 96% { transform: scaleY(.12) } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important } .flow { display: none } }</style>
+<defs>
+    <radialGradient id="pP" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(204.8 28) scale(640 616)"><stop offset="0" stop-color="#3B2F63" stop-opacity=".85"/><stop offset="1" stop-color="#3B2F63" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pT" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1152 560) scale(640 616)"><stop offset="0" stop-color="#1D4A5C" stop-opacity=".8"/><stop offset="1" stop-color="#1D4A5C" stop-opacity="0"/></radialGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#fff" fill-opacity=".045"/></pattern>
+    <clipPath id="card"><rect width="1280" height="560" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="1280" height="560" fill="#08090B"/>
+    <rect width="1280" height="560" fill="url(#pP)"/>
+    <rect width="1280" height="560" fill="url(#pT)"/>
+    <rect width="1280" height="560" fill="url(#dots)"/>
+  </g>
+  <rect x=".5" y=".5" width="1279" height="559" rx="27.5" fill="none" stroke="#fff" stroke-opacity=".07"/>
+  <defs><marker id="ahr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2DD4BF"/></marker></defs>
+  <text x="40" y="78" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">HOW YOUR PHONE REACHES YOUR PC</text>
+  <text x="40" y="112" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="26" font-weight="650" fill="#F5F6F8">Flock passes on the controls. Claude carries the conversation.</text>
+  <path d="M286 263 L 510 263" fill="none" stroke="#2DD4BF" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <g class="flow"><rect x="-32" y="-12" width="64" height="24" rx="12" fill="#2DD4BF"/><text y="4.5" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" font-weight="600" fill="#0E0F11">start</text><animateMotion dur="3.2s" begin="0s" repeatCount="indefinite" path="M286 263 L 510 263"/></g>
+  <circle class="flow" r="3.5" fill="#2DD4BF" fill-opacity=".7"><animateMotion dur="3.2s" begin="-1.6s" repeatCount="indefinite" path="M286 263 L 510 263" keyPoints="1;0" keyTimes="0;1" calcMode="linear"/></circle>
+  <path d="M770 263 L 997 263" fill="none" stroke="#2DD4BF" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#2DD4BF"><animateMotion dur="3.2s" begin="-1.6s" repeatCount="indefinite" path="M770 263 L 997 263"/></circle>
+  <circle class="flow" r="3.5" fill="#2DD4BF" fill-opacity=".7"><animateMotion dur="3.2s" begin="-3.2s" repeatCount="indefinite" path="M770 263 L 997 263" keyPoints="1;0" keyTimes="0;1" calcMode="linear"/></circle>
+  <path d="M286 371 C 400 371, 400 421, 510 421" fill="none" stroke="#C084FC" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#C084FC"><animateMotion dur="3s" begin="0s" repeatCount="indefinite" path="M286 371 C 400 371, 400 421, 510 421"/></circle>
+  <circle class="flow" r="3.5" fill="#C084FC" fill-opacity=".7"><animateMotion dur="3s" begin="-1.5s" repeatCount="indefinite" path="M286 371 C 400 371, 400 421, 510 421" keyPoints="1;0" keyTimes="0;1" calcMode="linear"/></circle>
+  <path d="M770 421 C 880 421, 880 379, 997 379" fill="none" stroke="#C084FC" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#C084FC"><animateMotion dur="3s" begin="-1.5s" repeatCount="indefinite" path="M770 421 C 880 421, 880 379, 997 379"/></circle>
+  <circle class="flow" r="3.5" fill="#C084FC" fill-opacity=".7"><animateMotion dur="3s" begin="-3s" repeatCount="indefinite" path="M770 421 C 880 421, 880 379, 997 379" keyPoints="1;0" keyTimes="0;1" calcMode="linear"/></circle>
+  <g>
+  <defs><clipPath id="ph21"><rect x="50" y="160" width="240" height="332" rx="32"/></clipPath></defs>
+  <rect x="40" y="150" width="260" height="352" rx="42" fill="#050506" stroke="#fff" stroke-opacity=".14"/>
+  <rect x="50" y="160" width="240" height="332" rx="32" fill="#0B0C0E"/>
+  <g clip-path="url(#ph21)">
+    <text x="76" y="187" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#F5F6F8">9:41</text>
+    <circle cx="170" cy="182" r="6" fill="#000" stroke="#fff" stroke-opacity=".08"/>
+    <g fill="#F5F6F8">
+      <rect x="228" y="180" width="3" height="6" rx="1"/><rect x="233" y="178" width="3" height="8" rx="1"/><rect x="238" y="176" width="3" height="10" rx="1"/>
+      <rect x="246" y="176" width="20" height="10" rx="3" fill="none" stroke="#F5F6F8" stroke-opacity=".6"/><rect x="248" y="178" width="13" height="6" rx="1.5"/>
+    </g>
+    <rect x="67" y="220" width="206" height="86" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <g class="m " transform="translate(79 237) scale(1.15)" style="--d:-0.5s">
+  <defs>
+    <linearGradient id="m22b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f7f9"/><stop offset="1" stop-color="#dddddf"/></linearGradient>
+    <radialGradient id="m22h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m22g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fbfbfc" stop-opacity=".9"/><stop offset="1" stop-color="#fbfbfc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m22s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#7b7b7c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#7b7b7c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#7b7b7c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m22g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#fbfbfc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m22b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m22h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+    <text x="139" y="259" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Flock</text>
+    <text x="139" y="279" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">start, stop, answer</text>
+    <rect x="67" y="328" width="206" height="86" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+    <rect x="81" y="349" width="44" height="44" rx="13" fill="#fff" fill-opacity=".06"/><path d="M95 365.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H102.2L98.5 377v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="139" y="367" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Claude app</text>
+    <text x="139" y="387" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">your conversation</text>
+    <rect x="87" y="436" width="166" height="28" rx="14" fill="#22C55E" fill-opacity=".12"/>
+    <circle cx="104" cy="450" r="4" fill="#22C55E"/>
+    <text x="116" y="455" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" font-weight="600" fill="#86EFAC">Paired with your PC</text>
+  </g>
+</g>
+  <rect x="980" y="150" width="260" height="352" rx="22" fill="#0E0F11" fill-opacity=".92" stroke="#fff" stroke-opacity=".09"/>
+  <text x="1002" y="184" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">YOUR PC</text>
+  <rect x="997" y="220" width="226" height="86" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+  <rect x="1011" y="242" width="104" height="42" rx="21" fill="#000" stroke="#fff" stroke-opacity=".09"/>
+  <g class="m " transform="translate(1018 249) scale(0.7)" style="--d:0s">
+  <defs>
+    <linearGradient id="m23b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#df8d72"/><stop offset="1" stop-color="#c36b4e"/></linearGradient>
+    <radialGradient id="m23h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m23g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f0c9bc" stop-opacity=".9"/><stop offset="1" stop-color="#f0c9bc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m23s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#6d3c2c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#6d3c2c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#6d3c2c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m23g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#f0c9bc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m23b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m23h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+  <g class="m " transform="translate(1048 249) scale(0.7)" style="--d:-0.9s">
+  <defs>
+    <linearGradient id="m24b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#58c8f9"/><stop offset="1" stop-color="#32aadf"/></linearGradient>
+    <radialGradient id="m24h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m24g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#afe5fc" stop-opacity=".9"/><stop offset="1" stop-color="#afe5fc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m24s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#1c5f7c"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#1c5f7c" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m24g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#afe5fc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m24b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m24h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+  <g class="m " transform="translate(1078 249) scale(0.7)" style="--d:-1.8s">
+  <defs>
+    <linearGradient id="m25b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#67e394"/><stop offset="1" stop-color="#43c873"/></linearGradient>
+    <radialGradient id="m25h" cx=".3" cy=".08" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m25g" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#b7f2cc" stop-opacity=".9"/><stop offset="1" stop-color="#b7f2cc" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m25s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  </defs>
+  
+  <g class="bd">
+    <rect x="11.6" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#256f40"/>
+    <rect x="23.2" y="31.4" width="5.2" height="4.8" rx="2.4" fill="#256f40"/>
+    <path d="M26.6 12.8 Q27.4 9.6 28.6 7.4" fill="none" stroke="#256f40" stroke-width="1.6" stroke-linecap="round"/>
+    <circle class="gl" cx="29" cy="6.4" r="4.6" fill="url(#m25g)"/>
+    <circle cx="29" cy="6.4" r="2.3" fill="#b7f2cc"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m25b)"/>
+    <rect x="5.5" y="11.5" width="29" height="22" rx="8.5" fill="url(#m25h)"/>
+    <g class="ey" fill="#141413">
+      <rect x="13.6" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+      <rect x="23" y="18.6" width="3.4" height="5.6" rx="1.7"/>
+    </g>
+  </g>
+</g>
+  <text x="1129" y="259" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Flock</text>
+  <text x="1129" y="279" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">starts it</text>
+  <path d="M1110 310v18" stroke="#2DD4BF" stroke-width="2" stroke-linecap="round" marker-end="url(#ahr)"/>
+  <rect x="997" y="336" width="226" height="86" rx="16" fill="#141518" stroke="#fff" stroke-opacity=".07"/>
+  <text x="1015" y="370" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Claude Code</text>
+  <circle cx="1020" cy="393" r="4" fill="#22C55E"/>
+  <text x="1031" y="398" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12.5" fill="#86EFAC">Remote Control on</text>
+  <text x="1002" y="470" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#6B7079">in the folder you picked,</text>
+  <text x="1002" y="488" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#6B7079">with that account's sign-in</text>
+  <rect x="510" y="205" width="260" height="112" rx="18" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+  <text x="532" y="243" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="20" font-weight="650" fill="#F5F6F8">ntfy.sh relay</text>
+  <text x="532" y="269" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#9398A1">end-to-end encrypted: it only</text>
+  <text x="532" y="289" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#9398A1">ever sees scrambled data</text>
+  
+  <g fill="none" stroke="#2DD4BF" stroke-width="1.8" stroke-linecap="round"><rect x="732" y="230" width="16" height="12" rx="3"/><path d="M736 230v-2.5a4 4 0 0 1 8 0V230"/></g>
+  <rect x="510" y="365" width="260" height="112" rx="18" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+  <text x="532" y="403" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="20" font-weight="650" fill="#F5F6F8">Anthropic</text>
+  <text x="532" y="429" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#9398A1">Claude's Remote Control,</text>
+  <text x="532" y="449" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" fill="#9398A1">with your Claude login</text>
+  
+  <circle cx="46" cy="537" r="5" fill="#2DD4BF"/>
+  <text x="60" y="542" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#9398A1">Flock's messages: start, stop, and Claude Code's own questions</text>
+  <circle cx="600" cy="537" r="5" fill="#C084FC"/>
+  <text x="614" y="542" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#9398A1">Your conversation: everything you and Claude say</text>
+</svg>

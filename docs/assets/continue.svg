@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="630" viewBox="0 0 1280 630" role="img" aria-label="Continuing a session from the phone: with its Claude window open, the phone gets a copy that can come back to the window later; with the window closed, the phone carries on with the session itself">
+<title>Continuing a session from the phone: with its Claude window open, the phone gets a copy that can come back to the window later; with the window closed, the phone carries on with the session itself</title>
+<style>
+  .m .bd { animation: bob 3.4s ease-in-out infinite; animation-delay: var(--d); }
+  .m .gl { animation: glow 2.6s ease-in-out infinite; animation-delay: var(--d); }
+  .m .ey { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; animation-delay: var(--d); }
+  @keyframes bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-1.1px) } }
+  @keyframes glow { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+  @keyframes blink { 0%, 93%, 100% { transform: scaleY(1) } 96% { transform: scaleY(.12) } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important } .flow { display: none } }</style>
+<defs>
+    <radialGradient id="pP" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(204.8 31.5) scale(640 693)"><stop offset="0" stop-color="#3B2F63" stop-opacity=".85"/><stop offset="1" stop-color="#3B2F63" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pT" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1152 630) scale(640 693)"><stop offset="0" stop-color="#1D4A5C" stop-opacity=".8"/><stop offset="1" stop-color="#1D4A5C" stop-opacity="0"/></radialGradient>
+    <pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#fff" fill-opacity=".045"/></pattern>
+    <clipPath id="card"><rect width="1280" height="630" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#card)">
+    <rect width="1280" height="630" fill="#08090B"/>
+    <rect width="1280" height="630" fill="url(#pP)"/>
+    <rect width="1280" height="630" fill="url(#pT)"/>
+    <rect width="1280" height="630" fill="url(#dots)"/>
+  </g>
+  <rect x=".5" y=".5" width="1279" height="629" rx="27.5" fill="none" stroke="#fff" stroke-opacity=".07"/>
+  <defs><filter id="soft" x="-20%" y="-300%" width="140%" height="700%"><feGaussianBlur stdDeviation="6"/></filter><marker id="ahb" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#9398A1"/></marker></defs>
+  <text x="40" y="70" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">CONTINUING A SESSION FROM YOUR PHONE</text>
+  <text x="40" y="104" font-family="'Segoe UI Variable Display','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="26" font-weight="650" fill="#F5F6F8">Flock reopens it with Remote Control on, with everything said so far.</text>
+  <text x="40" y="158" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">WHILE WORK'S CLAUDE WINDOW IS OPEN</text>
+  <g>
+    <rect x="54" y="169" width="312" height="6" rx="3" fill="#38BDF8" opacity=".55" filter="url(#soft)"/>
+    <rect x="40" y="172" width="340" height="128" rx="12" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="54" y="172" width="312" height="2.5" rx="1.25" fill="#38BDF8" opacity="1"/>
+    <text x="58" y="203" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Work — Claude</text>
+    <g stroke="#6B7079" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <path d="M303 198h9"/>
+      <rect x="328" y="193.5" width="9" height="9" rx="1.5"/>
+      <path d="M353 193.5l9 9M362 193.5l-9 9"/>
+    </g>
+    <path d="M40 218h340" stroke="#fff" stroke-opacity=".06"/>
+    <rect x="58" y="234" width="30" height="30" rx="9" fill="#fff" fill-opacity=".06"/><path d="M66 244.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H73.2L69.5 256v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="100" y="248" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Pricing table redesign</text>
+    <text x="100" y="267" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#6B7079">the window keeps the original</text>
+  </g>
+  <path d="M380 236 L 906 236" fill="none" stroke="#38BDF8" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#38BDF8"><animateMotion dur="3.4s" begin="0s" repeatCount="indefinite" path="M380 236 L 906 236"/></circle>
+  
+  <rect x="543.1" y="221" width="199.8" height="30" rx="15" fill="#000" stroke="#38BDF8" stroke-opacity=".5"/>
+  <text x="643" y="241" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">a copy: --fork-session</text>
+  <rect x="910" y="172" width="330" height="128" rx="18" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="928" y="190" width="36" height="36" rx="11" fill="#fff" fill-opacity=".06"/><path d="M937 202.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H944.2L940.5 214v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="976" y="205" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">Claude app, on your phone</text>
+    <text x="976" y="224" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Pricing table redesign</text>
+    <circle cx="934" cy="256" r="4" fill="#22C55E"/>
+    <text x="946" y="261" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#86EFAC">Remote Control on</text>
+    <text x="946" y="281" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">with everything said so far</text>
+  <path d="M1075 304 C 1075 348, 210 348, 210 308" fill="none" stroke="#9398A1" stroke-opacity=".7" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round" marker-end="url(#ahb)"/>
+  <text x="643" y="362" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#9398A1">Back at your PC: Settings → Phone → Open in Work's window</text>
+  <text x="40" y="406" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="12" letter-spacing="2" fill="#9398A1">WHILE IT IS CLOSED</text>
+  <g opacity=".5"><g>
+    
+    <rect x="40" y="420" width="340" height="128" rx="12" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="54" y="420" width="312" height="2.5" rx="1.25" fill="#38BDF8" opacity="0.75"/>
+    <text x="58" y="451" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#F5F6F8">Work — Claude</text>
+    <g stroke="#6B7079" stroke-width="1.4" fill="none" stroke-linecap="round">
+      <path d="M303 446h9"/>
+      <rect x="328" y="441.5" width="9" height="9" rx="1.5"/>
+      <path d="M353 441.5l9 9M362 441.5l-9 9"/>
+    </g>
+    <path d="M40 466h340" stroke="#fff" stroke-opacity=".06"/>
+    <rect x="58" y="482" width="30" height="30" rx="9" fill="#fff" fill-opacity=".06"/><path d="M66 492.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H73.2L69.5 504v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="100" y="496" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="600" fill="#9398A1">Pricing table redesign</text>
+    <text x="100" y="515" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#6B7079">not open anywhere</text>
+  </g></g>
+  <path d="M380 484 L 906 484" fill="none" stroke="#38BDF8" stroke-opacity=".6" stroke-width="2" stroke-dasharray="1 7" stroke-linecap="round"/>
+  <circle class="flow" r="4" fill="#38BDF8"><animateMotion dur="3.4s" begin="-1.7s" repeatCount="indefinite" path="M380 484 L 906 484"/></circle>
+  
+  <rect x="519.4" y="469" width="247.20000000000002" height="30" rx="15" fill="#000" stroke="#38BDF8" stroke-opacity=".5"/>
+  <text x="643" y="489" text-anchor="middle" font-family="'Cascadia Mono','Cascadia Code',Consolas,'SF Mono',Menlo,monospace" font-size="13" fill="#F5F6F8">the session itself: --resume</text>
+  <rect x="910" y="420" width="330" height="128" rx="18" fill="#0E0F11" stroke="#fff" stroke-opacity=".09"/>
+    <rect x="928" y="438" width="36" height="36" rx="11" fill="#fff" fill-opacity=".06"/><path d="M937 450.5c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6.5c0 1.1-.9 2-2 2H944.2L940.5 462v-3h-.5c-1.1 0-2-.9-2-2z" fill="none" stroke="#F5F6F8" stroke-opacity=".8" stroke-width="1.6" stroke-linejoin="round"/>
+    <text x="976" y="453" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">Claude app, on your phone</text>
+    <text x="976" y="472" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="600" fill="#F5F6F8">Pricing table redesign</text>
+    <circle cx="934" cy="504" r="4" fill="#22C55E"/>
+    <text x="946" y="509" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#86EFAC">Remote Control on</text>
+    <text x="946" y="529" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9398A1">with everything said so far</text>
+  <path d="M1075 552 C 1075 590, 210 590, 210 556" fill="none" stroke="#9398A1" stroke-opacity=".7" stroke-width="2" stroke-dasharray="3 6" stroke-linecap="round" marker-end="url(#ahb)"/>
+  <text x="643" y="598" text-anchor="middle" font-family="'Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif" font-size="14" fill="#9398A1">Open the window again and it goes back there</text>
+</svg>
