@@ -90,6 +90,8 @@ androidComponents {
 }
 
 dependencies {
+    // AndroidX and Play services pull in different Kotlin standard libraries; one version for all.
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
     implementation 'androidx.core:core:1.13.1'
     implementation 'androidx.webkit:webkit:1.12.1'
     // Google's code scanner: a QR scanner run by Play services, no camera permission needed.
