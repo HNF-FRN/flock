@@ -91,7 +91,8 @@ function launcher() {
  * other endpoints and other places to keep the sign-in are left out: Remote
  * Control needs this sign-in, a claude.ai one, talking to Anthropic directly.
  */
-function envFor({ dir, store } = {}) {
+function envFor(signIn) {
+  const { dir, store } = signIn || {};
   const env = {};
   for (const [k, v] of Object.entries(process.env)) {
     if (claude.NEVER_PASS_RE.test(k) || claude.SESSION_VAR_RE.test(k)) continue;
@@ -191,6 +192,21 @@ async function overwritten(opts) {
 }
 
 /**
+ * Whether Claude Code keeps a sign-in where CLAUDE_SECURESTORAGE_CONFIG_DIR
+ * says, which ~/.claude's second sign-in depends on: asked with it pointing at
+ * an empty folder while ~/.claude's own sign-in is signed in, a Claude Code
+ * that ignores it says signed in. (Signed out, there is nothing to tell apart.)
+ */
+async function storesApart(storeRoot, opts) {
+  const st = await status({}, opts);
+  if (!st.loggedIn) return true;
+  const empty = path.join(storeRoot, '.empty');
+  try { fs.mkdirSync(empty, { recursive: true }); } catch {}
+  const probe = await status({ dir: claude.DEFAULT_CONFIG_DIR, store: empty }, opts);
+  return probe.problem === 'signed-out';
+}
+
+/**
  * Each account's Claude Code sign-in: Map(id -> { dir, store, key, users,
  * status, ok, problem }). `dir` and `store` say how Claude Code runs for it
  * (envFor); `key` names the sign-in in `owners`, which holds the accounts
@@ -198,7 +214,8 @@ async function overwritten(opts) {
  * its own gets the problem 'unsupported', and `users` lists the accounts that
  * use the ones its folder can have. With `renew`, ~/.claude's own sign-in has
  * to be signed in again before Flock trusts whose it is. Without `storeRoot`,
- * ~/.claude has no second sign-in.
+ * or with a Claude Code that can't keep a sign-in apart, ~/.claude has no
+ * second sign-in.
  */
 async function signIns(profiles, { owners = {}, renew = false, storeRoot = null } = {}, opts = {}) {
   const folders = new Map(); // key -> { dir, members }
@@ -215,7 +232,7 @@ async function signIns(profiles, { owners = {}, renew = false, storeRoot = null 
     const own = (p) => Boolean(p.config && p.config.mode === 'own');
     const first = (list) => list.find(own) || list[0] || null;
     const owner = (k) => members.find((p) => p.id === owners[k]) || null;
-    const two = !dir && Boolean(storeRoot);
+    const two = !dir && Boolean(storeRoot) && await storesApart(storeRoot, opts);
 
     // Whose the folder's own sign-in is, and (~/.claude) whose the second one.
     let holder = owner(key);
