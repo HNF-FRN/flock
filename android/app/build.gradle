@@ -1,0 +1,97 @@
+plugins {
+    id 'com.android.application'
+}
+
+// One version for Flock on every platform: the desktop app's package.json.
+def pkg = new groovy.json.JsonSlurper().parse(rootProject.file('../package.json'))
+def (major, minor, patch) = pkg.version.tokenize('.-').take(3).collect { it as int }
+
+// The phone app itself is docs/app (also served by GitHub Pages); it is packed
+// in as assets under app/, without the offline cache the web version needs.
+abstract class CopyWebApp extends DefaultTask {
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    abstract DirectoryProperty getSource()
+
+    @OutputDirectory
+    abstract DirectoryProperty getOutput()
+
+    @Inject
+    abstract FileSystemOperations getFs()
+
+    @TaskAction
+    void copy() {
+        fs.sync {
+            from(source) { exclude 'sw.js' }
+            into(output.dir('app'))
+        }
+    }
+}
+
+def copyWebApp = tasks.register('copyWebApp', CopyWebApp) {
+    source.set(rootProject.file('../docs/app'))
+}
+
+android {
+    namespace 'dev.hnf.flock'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'dev.hnf.flock'
+        minSdk 24
+        targetSdk 35
+        versionCode major * 10000 + minor * 100 + patch
+        versionName pkg.version
+    }
+
+    // Release builds are signed with Flock's own key (a GitHub secret, passed
+    // in by .github/workflows/android.yml), so a new version installs over the
+    // old one. Without it, a local release build falls back to the debug key.
+    signingConfigs {
+        release {
+            def store = System.getenv('FLOCK_KEYSTORE')
+            if (store) {
+                storeFile file(store)
+                storeType 'pkcs12'
+                storePassword System.getenv('FLOCK_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('FLOCK_KEY_ALIAS') ?: 'flock'
+                keyPassword System.getenv('FLOCK_KEYSTORE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig System.getenv('FLOCK_KEYSTORE') ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "Flock-${variant.versionName}${variant.buildType.name == 'release' ? '' : '-' + variant.buildType.name}.apk"
+        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().all(), { variant ->
+        variant.sources.assets.addGeneratedSourceDirectory(copyWebApp, CopyWebApp::getOutput)
+    })
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.webkit:webkit:1.12.1'
+    // Google's code scanner: a QR scanner run by Play services, no camera permission needed.
+    implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
+}

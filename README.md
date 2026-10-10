@@ -114,10 +114,11 @@ Flock can start Claude Code on your PC while you're away, in any account and any
 
 You need [Claude Code](https://claude.com/claude-code) (the CLI) on the PC, and a Pro, Max, Team or Enterprise plan for each account you use this way. Remote Control doesn't work with API keys.
 
-1. On the PC, open **Settings → Phone** and switch it on. Press **Pair a phone** and scan the code with your phone's camera. The Flock app opens in your browser; add it to your home screen.
-2. Under **Claude Code sign-in for each account**, press **Sign in** next to each account that isn't ready, and sign in with that account's Claude login in the browser that opens. You do this once per account.
-3. On the phone, tap an account. Pick a recent project, or browse to a folder or create a new one, then tap **Start Claude here**. If Claude Code asks whether to trust the folder (or, the first time, whether to turn on Remote Control), its question shows on your phone word for word, and your answer goes back to it.
-4. Tap **Open the session**. The Claude app has to be signed in to that same Claude account. **Start another session here** opens a fresh session in the same folder, for when a session's context is full.
+1. Get Flock on your phone. On Android, open [Releases](https://github.com/HNF-FRN/flock/releases/latest) on the phone, download **Flock-*version*.apk** and open it (Android asks you to let your browser install apps). On any other phone, use the web version: it opens when you scan the pairing code with the camera.
+2. On the PC, open **Settings → Phone**, switch it on and press **Pair a phone**. In the Android app, tap **Scan the code** and point the camera at it. On another phone, scan the code with the camera and add the page that opens to your home screen.
+3. Under **Claude Code sign-in for each account**, press **Sign in** next to each account that isn't ready, and sign in with that account's Claude login in the browser that opens. You do this once per account.
+4. On the phone, tap an account. Pick a recent project, or browse to a folder or create a new one, then tap **Start Claude here**. If Claude Code asks whether to trust the folder (or, the first time, whether to turn on Remote Control), its question shows on your phone word for word, and your answer goes back to it.
+5. Tap **Open the session**. The Claude app has to be signed in to that same Claude account. **Start another session here** opens a fresh session in the same folder, for when a session's context is full.
 
 <details>
 <summary><b>How the phone part works</b></summary>
@@ -125,6 +126,7 @@ You need [Claude Code](https://claude.com/claude-code) (the CLI) on the PC, and 
 
 - Each folder runs `claude remote-control`, the [Remote Control](https://code.claude.com/docs/en/remote-control) server from Claude Code, under that account's Claude Code sign-in. Flock runs it in a pseudo-console, so Claude Code asks its own questions there. Flock passes each question to your phone and types only your answer. It never answers a question itself and never sends a prompt: what Claude does is up to you, in the Claude app.
 - Claude Code keeps one sign-in per `CLAUDE_CONFIG_DIR`, and an account with its own `~/.claude` uses that folder's. Of the accounts that share `~/.claude`, one uses Claude Code's default sign-in. A second sets `CLAUDE_CONFIG_DIR` to `~/.claude` itself: Claude Code keeps that as a separate sign-in over the same settings, skills, CLAUDE.md and memory. Flock matches sign-ins to accounts by organization. A third sharing account needs its own `~/.claude`. Flock reads sign-in status from `claude auth status` and never touches credentials.
+- Flock for Android (`android/`) is a small native app around the same page, with Google's code scanner for the pairing code; session links open in the Claude app. GitHub Actions builds and signs it for each release.
 - The phone app is a static page in `docs/app`, served by GitHub Pages. It talks to Flock through [ntfy.sh](https://ntfy.sh), a public publish/subscribe relay, over ordinary outgoing HTTPS: no open ports, no tunnel, no account. Every message is end-to-end encrypted (AES-256-GCM) with a key that exists only on your PC (sealed with Windows' DPAPI) and your phone. The key travels once, in the QR code, which shows only in Flock's settings and is left out of screenshots and screen sharing.
 - Your phone can browse, create folders and start sessions only inside your project folders and each account's recent projects. You set the project folders in **Settings → Phone**; by default they are your home folder and the folders that hold your recent projects.
 - The PC has to be on and awake, with Flock running. By default Flock keeps it from idle-sleeping while a phone is paired. Phone sessions stop when Flock quits. Start the same folder again within about four hours and Claude Code brings its sessions back.
@@ -218,7 +220,9 @@ npm start
 | Command | What it does |
 |---|---|
 | `npm run dist` | Builds `dist\Flock Setup <version>.exe` (per-user install, no admin) |
-| `npm run icons` | Draws the app and tray icons from the mascot |
+| `npm run icons` | Draws the app, tray, phone-app and Android icons from the mascot |
+| `node scripts/phone-app.mjs` | Copies the shared files into the phone app (`docs/app`) after you change them |
+| `gradle assembleDebug` (in `android/`) | Builds Flock for Android, with the Android SDK; releases are built by `.github/workflows/android.yml` |
 | `node scripts/readme-art.mjs` | Redraws the artwork in this README |
 
 `dev/` holds a mascot preview page and `dev/cdp.js`, which drives a dev run started with `--remote-debugging-port=9339`. The accent edge is left out of screenshots; start a dev run with `FLOCK_EDGE_CAPTURE=1` to capture it.

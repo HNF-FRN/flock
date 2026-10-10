@@ -8,6 +8,7 @@
 
   const R = window.FlockRelay;
   const B = window.FlockMascot;
+  const ANDROID = window.FlockAndroid || null; // inside Flock for Android (android/): a QR scanner and the phone's name
   const app = document.getElementById('app');
   const PAIR_KEY = 'flock.pairing';
   const REQUEST_MS = 25000;
@@ -53,6 +54,7 @@
     gear: '<circle cx="8" cy="8" r="2"/><path d="M8 1.8v1.6M8 12.6v1.6M1.8 8h1.6M12.6 8h1.6M3.6 3.6l1.1 1.1M11.3 11.3l1.1 1.1M3.6 12.4l1.1-1.1M11.3 4.7l1.1-1.1"/>',
     open: '<path d="M9 2.8h4.2V7M13 3 7.4 8.6M11.6 9.6v2.6c0 .6-.4 1-1 1H3.8c-.6 0-1-.4-1-1V5.4c0-.6.4-1 1-1h2.6"/>',
     refresh: '<path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.8v2.6h-2.6"/>',
+    scan: '<path d="M2.5 5.5v-2a1 1 0 0 1 1-1h2M10.5 2.5h2a1 1 0 0 1 1 1v2M13.5 10.5v2a1 1 0 0 1-1 1h-2M5.5 13.5h-2a1 1 0 0 1-1-1v-2M4.8 8h6.4"/>',
     warn: '<path d="M8 2.6 14 13H2z"/><path d="M8 6.6v3M8 11.6v.1"/>',
   };
 
@@ -100,6 +102,9 @@
   }
 
   function deviceName() {
+    if (ANDROID) {
+      try { return String(ANDROID.device()).slice(0, 40) || 'Android phone'; } catch {}
+    }
     const ua = navigator.userAgent;
     if (/iPhone/.test(ua)) return 'iPhone';
     if (/iPad/.test(ua)) return 'iPad';
@@ -304,31 +309,57 @@
 
   function viewPair() {
     const err = h('p', { class: 'note err hidden' });
-    const input = h('input', { type: 'url', placeholder: 'Or paste the pairing link', autocomplete: 'off', spellcheck: 'false' });
-    const pasteBtn = h('button', { class: 'btn secondary', text: 'Pair' });
-    pasteBtn.addEventListener('click', async () => {
-      const m = /#p=([A-Za-z0-9_-]+)/.exec(input.value.trim());
+    const fail = (text) => {
+      err.textContent = text;
+      err.classList.remove('hidden');
+    };
+    const pairFrom = async (text, btn) => {
+      const m = /#p=([A-Za-z0-9_-]+)/.exec(String(text || '').trim());
       err.classList.add('hidden');
-      busy(pasteBtn, true, 'Pairing…');
+      busy(btn, true, 'Pairing…');
       try {
-        await pairWith(m ? m[1] : input.value.trim());
+        await pairWith(m ? m[1] : String(text || '').trim());
         go({ v: 'home' }, true);
       } catch (e) {
-        err.textContent = e.message;
-        err.classList.remove('hidden');
+        fail(e.message);
       }
-      busy(pasteBtn, false);
-    });
+      busy(btn, false);
+    };
+    const input = h('input', { type: 'url', placeholder: 'Or paste the pairing link', autocomplete: 'off', spellcheck: 'false' });
+    const pasteBtn = h('button', { class: 'btn secondary', text: 'Pair' });
+    pasteBtn.addEventListener('click', () => pairFrom(input.value, pasteBtn));
+
+    // In Flock for Android the app reads the code itself, with Google's scanner.
+    let scanBtn = null;
+    if (ANDROID) {
+      scanBtn = h('button', { class: 'btn primary big' }, icon('scan'), 'Scan the code');
+      scanBtn.addEventListener('click', () => {
+        err.classList.add('hidden');
+        window.flockScanned = (text) => pairFrom(text, scanBtn);
+        window.flockScanFailed = (msg) => fail(`The scanner didn’t open${msg ? ` (${msg})` : ''}. Paste the pairing link instead.`);
+        window.flockScanCancelled = () => {};
+        ANDROID.scan();
+      });
+      // A pairing link opened with the app (from the camera app) arrives the same way.
+      window.flockScanned = (text) => pairFrom(text, scanBtn);
+    }
+
     const trio = h('div', { class: 'trio' },
       mascot('#38BDF8', 'asleep', 't1'), mascot(B.CLAUDE_ORANGE, 'awake', 't2'), mascot('#4ADE80', 'alert', 't3'));
+    const steps = ANDROID
+      ? [
+        h('li', {}, 'On your PC, open ', h('b', { text: 'Flock → Settings → Phone' }), ' and press ', h('b', { text: 'Pair a phone' }), '.'),
+        h('li', {}, 'Tap ', h('b', { text: 'Scan the code' }), ' below and point your camera at the code on your PC.')]
+      : [
+        h('li', {}, 'On your PC, open ', h('b', { text: 'Flock → Settings → Phone' }), ' and press ', h('b', { text: 'Pair a phone' }), '.'),
+        h('li', {}, 'Scan the code with your phone’s camera. It opens this page and pairs it.'),
+        h('li', {}, 'Add this page to your home screen, so Flock is one tap away.')];
     return h('div', { class: 'page pair' },
       trio,
       h('h1', { text: 'Flock, on your phone' }),
       h('p', { class: 'lead', text: 'Start Claude Code on your PC from here, in any of your accounts and any project folder, and pick it up in the Claude app.' }),
-      h('ol', { class: 'steps' },
-        h('li', {}, 'On your PC, open ', h('b', { text: 'Flock → Settings → Phone' }), ' and press ', h('b', { text: 'Pair a phone' }), '.'),
-        h('li', {}, 'Scan the code with your phone’s camera. It opens this page and pairs it.'),
-        h('li', {}, 'Add this page to your home screen, so Flock is one tap away.')),
+      h('ol', { class: 'steps' }, steps),
+      scanBtn,
       h('div', { class: 'paste' }, input, pasteBtn),
       err);
   }
@@ -643,6 +674,11 @@
       h('div', { class: 'card static' }, mascot(B.INK, 'awake', 'acct-m'),
         h('div', { class: 'card-main' }, h('b', { text: S.pc ? S.pc.name : (S.pairing && S.pairing.name) || 'Your PC' }),
           h('span', { class: 'sub', text: S.pc ? `Flock ${S.pc.version}` : 'Paired' })))));
+    if (ANDROID) {
+      let v = '';
+      try { v = ANDROID.version(); } catch {}
+      page.append(h('p', { class: 'note', text: `Flock for Android ${v}` }));
+    }
     page.append(h('p', { class: 'note', text: `Messages to your PC go through ${S.pairing ? new URL(S.pairing.server).host : 'the relay'}, end-to-end encrypted with a key only this phone and your PC have.` }));
     const btn = h('button', { class: 'btn danger big', text: 'Unpair this phone' });
     btn.addEventListener('click', () => {
@@ -703,6 +739,7 @@
     if (document.visibilityState === 'visible' && S.pairing && S.link) refresh();
   });
 
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  // The web version keeps itself on the phone for offline starts; the Android app carries its files.
+  if (!ANDROID && 'serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   start();
 })();

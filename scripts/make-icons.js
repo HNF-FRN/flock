@@ -32,6 +32,11 @@ function drawInPage(size, kind, svgText) {
         ctx.fill();
         const m = size * (kind === 'mask' ? 0.56 : 0.78);
         ctx.drawImage(img, (size - m) / 2, (size - m) / 2, m, m);
+      } else if (kind === 'fg') {
+        // An Android adaptive icon's foreground: the launcher supplies the
+        // backdrop and crops to its own shape, keeping the middle 66 of 108.
+        const m = size * 0.56;
+        ctx.drawImage(img, (size - m) / 2, (size - m) / 2, m, m);
       } else {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
         ctx.shadowBlur = Math.max(1, size * 0.07);
@@ -100,6 +105,14 @@ app.whenReady().then(async () => {
   fs.writeFileSync(path.join(phone, 'icon-192.png'), await render(192, 'tile'));
   fs.writeFileSync(path.join(phone, 'icon-512.png'), await render(512, 'tile'));
   fs.writeFileSync(path.join(phone, 'maskable-512.png'), await render(512, 'mask'));
+  // Flock for Android's launcher icon: adaptive (Android 8+) and the classic tile.
+  const densities = { mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 };
+  for (const [name, scale] of Object.entries(densities)) {
+    const dir = path.join(ROOT, 'android', 'app', 'src', 'main', 'res', `mipmap-${name}`);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, 'ic_launcher.png'), await render(48 * scale, 'tile'));
+    fs.writeFileSync(path.join(dir, 'ic_launcher_foreground.png'), await render(108 * scale, 'fg'));
+  }
   console.log('icons written');
   app.quit();
 });

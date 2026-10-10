@@ -1,0 +1,63 @@
+# Builds Flock for Android (android/, around the phone app in docs/app) and,
+# for a version tag, attaches the APK to that GitHub release. It is signed
+# with Flock's own key from the repository's secrets, so each new version
+# installs over the one before.
+name: Android app
+
+on:
+  push:
+    tags: ['v*']
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'docs/app/**'
+      - 'package.json'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Signing key
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > android/app/flock-release.p12
+            echo "FLOCK_KEYSTORE=flock-release.p12" >> "$GITHUB_ENV"
+          else
+            echo "::warning::No ANDROID_KEYSTORE secret, so this APK is signed with a throwaway debug key."
+          fi
+
+      - name: Build
+        working-directory: android
+        env:
+          FLOCK_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: gradle --no-daemon --stacktrace assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flock-android
+          path: android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" android/app/build/outputs/apk/release/*.apk --clobber
