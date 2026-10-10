@@ -1,16 +1,20 @@
 'use strict';
-// Claude Code Remote Control servers that Flock starts for the phone. Each is
-// one `claude remote-control` in a folder, under one account's Claude Code
-// sign-in, and serves several sessions: the one it starts with, and any the
-// phone starts there later from the Claude app. It runs in a pseudo-console
-// (pty.js) so Claude Code asks what it asks in a terminal: once per sign-in
-// whether to turn Remote Control on, and whether to trust a folder it hasn't
-// seen. Flock passes those questions to the phone word for word and types only
-// the phone's answer; it never answers them itself.
+// Claude Code Remote Control sessions that Flock starts for the phone, run in
+// a pseudo-console (pty.js) under one account's Claude Code sign-in. Two kinds:
+//   folder   `claude remote-control` in a folder: a server that starts with one
+//            session and lets the phone add more there from the Claude app.
+//   session  `claude --resume <conversation> --remote-control`: an existing
+//            Code session reopened with Remote Control on (or a copy of it, when
+//            Claude's window may still be using it), so it carries on from the
+//            phone with all its history.
+// Claude Code asks what it asks in a terminal: once per sign-in whether to turn
+// Remote Control on, and whether to trust a folder it hasn't seen. Flock passes
+// those questions to the phone word for word and types only the phone's
+// answer; it never answers them itself.
 //
-// What the server shows is read back from its screen: "Ready · <folder>",
-// the link that opens the folder in the Claude app, and one link per session
-// (terminal hyperlinks, titled with the session's name).
+// What Claude Code shows is read back from its screen: "Ready · <folder>", the
+// link that opens the folder in the Claude app, and each session's link (as a
+// terminal hyperlink titled with the session's name, or as plain text).
 
 const path = require('path');
 const pty = require('./pty');
@@ -18,17 +22,21 @@ const { log } = require('./log');
 const { pathKey } = require('./util');
 
 const START_TIMEOUT = 90 * 1000; // neither a question nor "Ready" by then: give up
-const ANSWER_TIMEOUT = 15 * 60 * 1000; // a question nobody answers stops the server
+const ANSWER_TIMEOUT = 15 * 60 * 1000; // a question nobody answers stops it
 const STOP_GRACE = 4000; // after Ctrl+C, before it is stopped outright
-const KEEP_ENDED = 30 * 60 * 1000; // how long a stopped server stays listed
+const KEEP_ENDED = 30 * 60 * 1000; // how long a stopped one stays listed
 const MAX_LIVE = 8;
 const MAX_TEXT = 64 * 1024;
 
 const ENV_URL_RE = /https:\/\/claude\.ai\/code\?environment=env_[A-Za-z0-9]+/g;
 const SESSION_URL_RE = /^https:\/\/claude\.ai\/code\/session_[A-Za-z0-9]+/;
+const SESSION_URL_TEXT_RE = /https:\/\/claude\.ai\/code\/session_[A-Za-z0-9]+/g;
 const READY_RE = /(?:^|[\s·])(Ready|Connected) · /m;
-const ERROR_RE = /^(?:Error: .+|Remote Control did not start: .+|You must be logged in.+|.*Remote Control (?:requires|isn't enabled|is disabled|is only available).+)$/gm;
+const RC_ON_RE = /remote-control is active/i;
+const RC_FAILED_RE = /Remote Control (?:failed|disconnected)[^\n]*/;
+const ERROR_RE = /^\s*(?:Error: .+|Remote Control did not start: .+|You must be logged in.+|No conversation found.+|.*Remote Control (?:requires|isn't enabled|is disabled|is only available).+)$/gm;
 const STATUS_WORDS = new Set(['attached', 'detached', 'connecting', 'connected', 'idle', 'running', 'working', 'waiting']);
+const KEYS = { up: '\x1b[A', down: '\x1b[B', enter: '\r', esc: '\x1b', ctrlC: '\x03' };
 
 const servers = new Map(); // id -> server
 let seq = 0;
@@ -40,9 +48,10 @@ const live = (s) => s.status === 'starting' || s.status === 'asking' || s.status
 
 /**
  * Turns terminal output into plain text, collecting its hyperlinks (OSC 8).
- * A jump to another row becomes a line break; erasing the screen below the
- * cursor or all of it (a redraw) becomes a form feed, so the text after the
- * last one is what the screen shows now.
+ * A jump to another row becomes a line break, a move to the right becomes
+ * spaces, and erasing the screen below the cursor or all of it (a redraw)
+ * becomes a form feed, so the text after the last one is what the screen
+ * shows now.
  */
 function feed(s, chunk) {
   const str = s.carry + chunk;
@@ -79,6 +88,9 @@ function feed(s, chunk) {
         }
         if (m[2] === 'H' || m[2] === 'f') out += '\n';
         else if (m[2] === 'J') { out += '\f'; s.frame++; }
+        // The pseudo-console sends runs of spaces as cursor moves to the right.
+        else if (m[2] === 'C') out += ' '.repeat(Math.min(200, Number(m[1]) || 1));
+        else if (m[2] === 'G') out += ' ';
         i += m[0].length;
         continue;
       }
@@ -101,18 +113,58 @@ function tidy(text) {
   return text.replace(/\f/g, '\n').replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
-/** A question waiting for its answer at the end of what was shown since the last answer, or null. */
+function since(s) {
+  return s.text.slice(Math.max(0, s.answered - s.base));
+}
+
+/** A typed question (`… [y/N]`) waiting at the end of what was shown since the last answer, or null. */
 function question(s) {
-  const since = s.text.slice(Math.max(0, s.answered - s.base));
-  const m = /([^\n]*(?:\[y\/N\]|\(y\/n\)|\[Y\/n\]|\[1\/2\][^\n]*:))\s*$/.exec(since);
+  const text = since(s);
+  const m = /([^\n]*(?:\[y\/N\]|\(y\/n\)|\[Y\/n\]|\[1\/2\][^\n]*:))\s*$/.exec(text);
   if (!m) return null;
   const ask = m[1].trim();
-  const before = tidy(since.slice(0, m.index).split('\f').pop());
-  if (/Enable Remote Control\?/.test(ask)) return { kind: 'consent', ask: 'Enable Remote Control?', text: before };
+  const before = tidy(text.slice(0, m.index).split('\f').pop());
+  if (/Enable Remote Control\?/.test(ask)) return { kind: 'consent', mode: 'line', ask: 'Enable Remote Control?', text: before };
   const trust = /^Trust (.+)\? \[y\/N\]$/.exec(ask);
-  if (trust) return { kind: 'trust', ask: `Trust ${trust[1]}?`, folder: trust[1], text: before };
-  if (/\[1\/2\]/.test(ask)) return { kind: 'choice', ask, text: before };
-  return { kind: 'question', ask: ask.replace(/\s*(\[y\/N\]|\(y\/n\)|\[Y\/n\])$/, ''), text: before.split('\n').slice(-6).join('\n') };
+  if (trust) return { kind: 'trust', mode: 'line', ask: `Trust ${trust[1]}?`, folder: trust[1], text: before };
+  if (/\[1\/2\]/.test(ask)) return { kind: 'choice', mode: 'line', ask, text: before, options: ['1', '2'] };
+  return { kind: 'question', mode: 'line', ask: ask.replace(/\s*(\[y\/N\]|\(y\/n\)|\[Y\/n\])$/, ''), text: before.split('\n').slice(-6).join('\n') };
+}
+
+/**
+ * A pick-list Claude Code's full-screen view is showing (options under a
+ * "❯" cursor, "Enter to confirm" below them), or null: { kind, ask, text,
+ * options, current }.
+ */
+function dialog(s) {
+  const text = since(s);
+  const at = text.lastIndexOf('Enter to confirm');
+  if (at === -1) return null;
+  const nl = text.indexOf('\n', at);
+  if (nl !== -1 && /\S/.test(text.slice(nl + 1).replace(/\f/g, ''))) return null; // not the last thing on screen
+  const lines = text.slice(0, at).split('\f').pop().split('\n').map((l) => l.replace(/\s+$/, ''));
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  // The options: the block of lines around the cursor, down to the hint line.
+  const cursor = lines.map((l) => l.includes('❯')).lastIndexOf(true);
+  if (cursor === -1) return null;
+  let first = cursor;
+  while (first > 0 && lines[first - 1].trim() && !/[.:?)]$/.test(lines[first - 1].trim())) first--;
+  const block = lines.slice(first).map((l, i) => ({ text: l.replace('❯', '').trim().replace(/^\d+\.\s+/, ''), cursor: first + i === cursor }))
+    .filter((o) => o.text);
+  const opts = block.map((o) => o.text);
+  if (opts.length < 2 || opts.length > 9) return null;
+  const body = tidy(lines.slice(0, first).join('\n').split(/\n\s*\n\s*\n/).pop()).replace(/[─│╭╮╰╯]+/g, '').trim();
+  const current = block.findIndex((o) => o.cursor);
+  const yes = opts.findIndex((o) => /^(yes\b|enable)/i.test(o));
+  const workspace = /Accessing workspace:\s*\n\s*(\S[^\n]*)/.exec(body);
+  if (workspace && yes !== -1) {
+    return { kind: 'trust', mode: 'select', ask: `Trust ${workspace[1].trim()}?`, folder: workspace[1].trim(), text: body, options: opts, current, yes };
+  }
+  if (/Remote Control/i.test(body + opts.join(' ')) && yes !== -1) {
+    return { kind: 'consent', mode: 'select', ask: 'Enable Remote Control?', text: body, options: opts, current, yes };
+  }
+  const lastLine = body.split('\n').filter((l) => l.trim()).pop() || 'Claude Code asks';
+  return { kind: 'choice', mode: 'select', ask: lastLine.trim(), text: body, options: opts, current };
 }
 
 function look(s) {
@@ -123,25 +175,34 @@ function look(s) {
   const errors = s.text.match(ERROR_RE);
   if (errors) s.lastError = errors[errors.length - 1].trim();
 
-  // The sessions are the links on the screen as it is now; each keeps the
-  // latest name it showed ("Attached" and such are states, not names).
+  // Its sessions: terminal hyperlinks on the screen as it is now, each keeping
+  // the latest name it showed ("Attached" and such are states, not names);
+  // a reopened session prints its one link as plain text.
   for (const l of s.links) {
     const m = SESSION_URL_RE.exec(l.url);
     if (m && l.text && !STATUS_WORDS.has(l.text.toLowerCase())) s.titles.set(m[0], l.text);
   }
   const screen = s.text.slice(s.text.lastIndexOf('\f') + 1);
-  if (READY_RE.test(screen)) {
-    const urls = new Set();
+  if (s.kind === 'session') {
+    const found = s.text.match(SESSION_URL_TEXT_RE);
+    if (found) s.sessions = [{ url: found[found.length - 1], title: s.title }];
+  } else if (READY_RE.test(screen)) {
+    const urls2 = new Set();
     for (const l of s.links) {
       const m = l.frame === s.frame && SESSION_URL_RE.exec(l.url);
-      if (m) urls.add(m[0]);
+      if (m) urls2.add(m[0]);
     }
-    s.sessions = [...urls].map((url) => ({ url, title: s.titles.get(url) || null }));
+    s.sessions = [...urls2].map((url) => ({ url, title: s.titles.get(url) || null }));
   }
   s.links = s.links.filter((l) => l.frame === s.frame);
 
-  if (!s.prompt) {
-    const q = question(s);
+  if (!s.prompt && s.status !== 'ready') {
+    const failed = s.kind === 'session' && RC_FAILED_RE.exec(since(s));
+    if (failed) {
+      fail(s, failed[0].trim());
+      return;
+    }
+    const q = question(s) || dialog(s);
     if (q) {
       s.prompt = { id: `q${++s.asked}`, ...q, at: Date.now() };
       s.status = 'asking';
@@ -150,7 +211,8 @@ function look(s) {
       log('phone server', s.id, 'asks', q.kind);
     }
   }
-  if (!s.prompt && s.status !== 'ready' && (READY_RE.test(s.text) || s.envUrl)) {
+  const ready = s.kind === 'session' ? s.sessions.length > 0 || RC_ON_RE.test(s.text) : READY_RE.test(s.text) || s.envUrl;
+  if (!s.prompt && s.status !== 'ready' && ready) {
     s.status = 'ready';
     clearTimeout(s.timer);
     log('phone server', s.id, 'ready');
@@ -161,13 +223,19 @@ function look(s) {
 // ── Servers ─────────────────────────────────────────────────────────────────
 
 function snapshot(s) {
+  const p = s.prompt;
   return {
     id: s.id,
+    kind: s.kind,
     account: s.account,
     folder: s.folder,
     name: path.basename(s.folder) || s.folder,
+    title: s.title || null,
+    session: s.session || null,
+    fork: Boolean(s.forkId),
+    forkId: s.forkId || null,
     status: s.status,
-    prompt: s.prompt ? { id: s.prompt.id, kind: s.prompt.kind, ask: s.prompt.ask, text: s.prompt.text, folder: s.prompt.folder || null } : null,
+    prompt: p ? { id: p.id, kind: p.kind, ask: p.ask, text: p.text, folder: p.folder || null, options: p.mode === 'select' && p.kind === 'choice' ? p.options : null } : null,
     envUrl: s.envUrl || null,
     sessions: s.sessions,
     error: s.status === 'failed' ? s.error : null,
@@ -197,30 +265,41 @@ function fail(s, error) {
   if (s.term) s.term.kill();
 }
 
-/** A name prefix for the sessions, from the folder: "Montero-graceful-unicorn" until the first prompt names them. */
+/** A name prefix for a folder's sessions: "Montero-graceful-unicorn" until the first prompt names them. */
 function prefix(folder) {
   return (path.basename(folder) || 'flock').replace(/[^A-Za-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 24) || 'flock';
 }
 
 /**
- * Starts a server in `folder` for `account` (a profile id), or returns the
- * one already running there. `launcher` and `env` say how to run Claude Code
- * for that account's sign-in (see cli.js).
+ * Starts Claude Code with Remote Control for `account` (a profile id), or
+ * returns the one already running for the same folder (folder kind) or the
+ * same session (session kind). `launcher` and `env` say how to run Claude Code
+ * for that account's sign-in (see cli.js). The session kind takes the
+ * arguments that reopen the conversation (`args`), its `title`, the Code
+ * session's id (`session`) and, when it runs as a copy, the copy's id (`forkId`).
  */
-async function start({ account, folder, launcher, env, spawnMode = 'same-dir', permissionMode = 'default' }) {
+async function start({ kind = 'folder', account, folder, launcher, env, spawnMode = 'same-dir', permissionMode = 'default', args: sessionArgs, title, session, forkId }) {
   prune();
   for (const s of servers.values()) {
-    if (live(s) && s.account === account && pathKey(s.folder) === pathKey(folder)) return snapshot(s);
+    if (!live(s) || s.account !== account || s.kind !== kind) continue;
+    if (kind === 'folder' ? pathKey(s.folder) === pathKey(folder) : s.session === session) return snapshot(s);
   }
   if ([...servers.values()].filter(live).length >= MAX_LIVE) {
-    throw new Error(`Flock already runs ${MAX_LIVE} folders for your phone. Stop one first.`);
+    throw new Error(`Flock already runs ${MAX_LIVE} sessions for your phone. Stop one first.`);
   }
-  const args = ['remote-control', '--spawn', spawnMode, '--remote-control-session-name-prefix', prefix(folder)];
-  if (permissionMode && permissionMode !== 'default') args.push('--permission-mode', permissionMode);
+  let args = sessionArgs;
+  if (kind === 'folder') {
+    args = ['remote-control', '--spawn', spawnMode, '--remote-control-session-name-prefix', prefix(folder)];
+    if (permissionMode && permissionMode !== 'default') args.push('--permission-mode', permissionMode);
+  }
   const s = {
     id: `rc${Date.now().toString(36)}${++seq}`,
+    kind,
     account,
     folder,
+    title: title || null,
+    session: session || null,
+    forkId: forkId || null,
     status: 'starting',
     startedAt: Date.now(),
     carry: '',
@@ -233,6 +312,7 @@ async function start({ account, folder, launcher, env, spawnMode = 'same-dir', p
     sessions: [],
     asked: 0,
     answered: 0,
+    declined: null,
     prompt: null,
     envUrl: null,
     lastError: null,
@@ -240,7 +320,7 @@ async function start({ account, folder, launcher, env, spawnMode = 'same-dir', p
     timer: null,
   };
   servers.set(s.id, s);
-  log('phone server', s.id, 'start', folder, spawnMode, permissionMode);
+  log('phone server', s.id, 'start', kind, folder, kind === 'folder' ? spawnMode : forkId ? 'as a copy' : 'in place', permissionMode);
   onChange(snapshot(s));
   s.timer = setTimeout(() => fail(s, s.lastError || 'Claude Code didn’t get going in time.'), START_TIMEOUT);
   try {
@@ -259,42 +339,77 @@ async function start({ account, folder, launcher, env, spawnMode = 'same-dir', p
     clearTimeout(pending);
     look(s);
     if (s.status === 'ready' || s.stopping) end(s, 'stopped');
+    else if (s.declined === 'trust') end(s, 'failed', 'You chose not to trust this folder, so Claude Code didn’t start.');
+    else if (s.declined === 'consent') end(s, 'failed', 'Remote Control wasn’t turned on, so Claude Code didn’t start.');
     else end(s, 'failed', s.lastError || `Claude Code stopped (exit code ${code}).`);
   });
   return snapshot(s);
 }
 
-/** Answers the server's open question with the phone's reply. */
-function answer(id, promptId, yes) {
+/** The keys that move a pick-list's cursor from `from` to `to` and confirm. */
+function pick(from, to) {
+  const step = to > from ? KEYS.down : KEYS.up;
+  return step.repeat(Math.abs(to - from)) + KEYS.enter;
+}
+
+/**
+ * Answers the open question with the phone's reply: { yes } for a yes/no
+ * question, or { option } (an index) for a pick-list of other choices.
+ */
+function answer(id, promptId, reply) {
   const s = servers.get(id);
   if (!s || !s.prompt || s.prompt.id !== promptId || !s.term) return false;
-  const kind = s.prompt.kind;
-  s.term.write(kind === 'choice' ? (yes ? '1\r' : '2\r') : yes ? 'y\r' : 'n\r');
+  const p = s.prompt;
+  const yes = Boolean(reply && reply.yes);
+  let keys;
+  if (p.mode === 'line') keys = p.kind === 'choice' ? (yes ? '1\r' : '2\r') : yes ? 'y\r' : 'n\r';
+  else if (p.kind === 'choice') {
+    const i = Number(reply && reply.option);
+    if (!Number.isInteger(i) || i < 0 || i >= p.options.length) return false;
+    keys = pick(p.current, i);
+  } else keys = yes ? pick(p.current, p.yes) : KEYS.esc;
+  if (!yes && (p.kind === 'trust' || p.kind === 'consent')) s.declined = p.kind;
+  s.term.write(keys);
   s.answered = s.base + s.text.length;
   s.prompt = null;
   s.status = 'starting';
   clearTimeout(s.timer);
   s.timer = setTimeout(() => fail(s, s.lastError || 'Claude Code didn’t get going in time.'), START_TIMEOUT);
-  log('phone server', id, 'answered', kind, yes ? 'yes' : 'no');
+  log('phone server', id, 'answered', p.kind, p.kind === 'choice' && p.mode === 'select' ? `option ${reply.option}` : yes ? 'yes' : 'no');
   onChange(snapshot(s));
   return true;
 }
 
-/** Stops a server the way Ctrl+C would, then outright if it lingers. */
+/** Stops it the way Ctrl+C would (twice: a reopened session asks for a second one), then outright. */
 function stop(id) {
   const s = servers.get(id);
   if (!s || !live(s) || !s.term) return false;
   s.stopping = true;
-  s.term.write('\x03');
+  s.term.write(KEYS.ctrlC);
+  setTimeout(() => { if (live(s)) s.term.write(KEYS.ctrlC); }, 700);
   setTimeout(() => { if (live(s)) s.term.kill(); }, STOP_GRACE);
   return true;
 }
 
-/** Stops every server (Flock is quitting); resolves once they have gone or after `ms`. */
+/**
+ * Claude's window for `account` opened: stops the sessions reopened in place
+ * for that account, so the window and the phone never write to one
+ * conversation at once. Resolves to the titles of the ones it stopped.
+ */
+function handBack(account) {
+  const stopped = [];
+  for (const s of servers.values()) {
+    if (live(s) && s.account === account && s.kind === 'session' && !s.forkId && stop(s.id)) stopped.push(s.title || s.name);
+  }
+  return stopped;
+}
+
+/** Stops every one (Flock is quitting); resolves once they have gone or after `ms`. */
 function stopAll(ms = 2500) {
   const running = [...servers.values()].filter((s) => live(s) && s.term);
   if (!running.length) return Promise.resolve();
-  running.forEach((s) => { s.stopping = true; s.term.write('\x03'); });
+  running.forEach((s) => { s.stopping = true; s.term.write(KEYS.ctrlC); });
+  setTimeout(() => running.filter(live).forEach((s) => s.term.write(KEYS.ctrlC)), 700);
   return new Promise((resolve) => {
     const t0 = Date.now();
     const check = setInterval(() => {
@@ -321,4 +436,4 @@ function watch(cb) {
   onChange = cb;
 }
 
-module.exports = { start, answer, stop, stopAll, list, get, watch, prefix, feed, question };
+module.exports = { start, answer, stop, stopAll, handBack, list, get, watch, prefix, feed, question, dialog };

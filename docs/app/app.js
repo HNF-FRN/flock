@@ -56,6 +56,7 @@
     refresh: '<path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.8v2.6h-2.6"/>',
     scan: '<path d="M2.5 5.5v-2a1 1 0 0 1 1-1h2M10.5 2.5h2a1 1 0 0 1 1 1v2M13.5 10.5v2a1 1 0 0 1-1 1h-2M5.5 13.5h-2a1 1 0 0 1-1-1v-2M4.8 8h6.4"/>',
     warn: '<path d="M8 2.6 14 13H2z"/><path d="M8 6.6v3M8 11.6v.1"/>',
+    chat: '<path d="M2.8 4.3c0-.8.7-1.5 1.5-1.5h7.4c.8 0 1.5.7 1.5 1.5v5c0 .8-.7 1.5-1.5 1.5H7.2L4.4 13v-2.2h-.1c-.8 0-1.5-.7-1.5-1.5z"/>',
   };
 
   function icon(name) {
@@ -237,7 +238,8 @@
     sheet.innerHTML = '';
     sheet.append(h('div', { class: 'grab' }), ...kids);
     sheetWrap.classList.remove('hidden');
-    requestAnimationFrame(() => sheetWrap.classList.add('open'));
+    void sheetWrap.offsetWidth; // lay it out closed first, so opening it slides (no frame callback: paused in the background)
+    sheetWrap.classList.add('open');
   }
 
   function closeSheet() {
@@ -366,13 +368,14 @@
 
   function serverCard(s) {
     const tone = { ready: 'ok', asking: 'warn', starting: 'warn', failed: 'err', stopped: '' }[s.status];
+    const reopened = s.kind === 'session';
     const text = s.status === 'ready'
-      ? (s.sessions.length ? `Running · ${s.sessions.length} session${s.sessions.length > 1 ? 's' : ''}` : 'Running')
+      ? reopened ? 'Remote Control on' : s.sessions.length ? `Running · ${s.sessions.length} session${s.sessions.length > 1 ? 's' : ''}` : 'Running'
       : { asking: 'Claude Code asks you something', starting: 'Starting…', failed: 'Didn’t start', stopped: 'Stopped' }[s.status];
     return h('button', { class: 'card srv', style: `--c:${s.color}`, onclick: () => go({ v: 'server', id: s.id }) },
       h('span', { class: 'srv-dot' }),
       h('div', { class: 'card-main' },
-        h('b', { text: s.name }),
+        h('b', { text: reopened ? s.title || s.name : s.name }),
         h('span', { class: `sub ${tone}`, text: `${s.accountName} · ${text}` })),
       icon('chev'));
   }
@@ -437,25 +440,68 @@
       h('div', { class: 'sheet-foot' }, h('button', { class: 'btn primary', text: 'OK', onclick: closeSheet })));
   }
 
-  // Folder picker: recent folders, or browse the project folders.
+  // Folder picker: recent folders, the account's sessions, or browse the project folders.
   const folderCache = new Map(); // "account|path" -> listing
+  const sessionCache = new Map(); // account -> its sessions
+
+  /** A session row: tap to continue it on the phone (or see it, when it already runs for the phone). */
+  function sessionRow(a, s, windowOpen) {
+    return h('button', { class: 'card folder', onclick: () => (s.server && S.servers.has(s.server) ? go({ v: 'server', id: s.server }) : continueSheet(a, s, windowOpen)) },
+      icon('chat'),
+      h('div', { class: 'card-main' }, h('b', { text: s.title || 'Untitled session' }), h('span', { class: `sub${s.server ? ' ok' : ''}`, text: s.server ? 'On your phone now' : ago(s.at) })),
+      icon('chev'));
+  }
+
+  function fillSessions(body, a, data) {
+    body.innerHTML = '';
+    if (!data.sessions.length) {
+      body.append(h('p', { class: 'note', text: `${a.name} has no Code sessions on your PC yet.` }));
+      return;
+    }
+    // Grouped by project, the most recently used first.
+    const groups = new Map();
+    for (const s of data.sessions) {
+      const k = s.cwd.toLowerCase();
+      if (!groups.has(k)) groups.set(k, { cwd: s.cwd, name: s.folder, list: [] });
+      groups.get(k).list.push(s);
+    }
+    for (const g of groups.values()) {
+      body.append(h('div', { class: 'group' }, h('b', { text: g.name }), h('span', { class: 'mono', text: short(g.cwd, 40) })));
+      g.list.slice(0, 8).forEach((s) => body.append(sessionRow(a, s, data.window)));
+    }
+  }
 
   function viewFolders(view) {
     const a = S.accounts.find((x) => x.id === view.account);
     if (!a) return viewHome();
     const tab = view.tab || 'recent';
     const page = h('div', { class: 'page' });
-    page.append(topbar(`New session · ${a.name}`, { back: true, sub: view.path ? short(view.path, 46) : 'Pick a folder' }));
+    page.append(topbar(a.name, { back: true, sub: view.path ? short(view.path, 46) : 'Start a session or continue one' }));
     page.firstChild.style.setProperty('--c', a.color);
 
     if (!view.path) {
-      page.append(h('div', { class: 'tabs', role: 'tablist' },
-        h('button', { class: tab === 'recent' ? 'on' : '', role: 'tab', onclick: () => { S.view = { ...view, tab: 'recent' }; history.replaceState(S.view, ''); render(); } }, 'Recent'),
-        h('button', { class: tab === 'browse' ? 'on' : '', role: 'tab', onclick: () => { S.view = { ...view, tab: 'browse' }; history.replaceState(S.view, ''); render(); } }, 'Browse')));
+      const tabBtn = (id, label) => h('button', {
+        class: tab === id ? 'on' : '',
+        role: 'tab',
+        onclick: () => { S.view = { ...view, tab: id }; history.replaceState(S.view, ''); render(); },
+      }, label);
+      page.append(h('div', { class: 'tabs', role: 'tablist' }, tabBtn('recent', 'Recent'), tabBtn('sessions', 'Sessions'), tabBtn('browse', 'Browse')));
     }
 
     const body = h('div', { class: 'cards' });
     page.append(body);
+    if (!view.path && tab === 'sessions') {
+      const cached = sessionCache.get(a.id);
+      if (cached) fillSessions(body, a, cached);
+      else body.append(h('p', { class: 'note', text: 'Loading…' }));
+      request('sessions', { account: a.id })
+        .then((data) => {
+          sessionCache.set(a.id, data);
+          if (S.view === view) fillSessions(body, a, data);
+        })
+        .catch((e) => { if (S.view === view) { body.innerHTML = ''; body.append(h('p', { class: 'note err', text: e.message })); } });
+      return page;
+    }
     const key = `${a.id}|${view.path || ''}`;
     const shown = folderCache.get(key);
     const fill = (data) => {
@@ -554,12 +600,57 @@
         busy(go_, false);
       }
     });
+    // The folder's own sessions, to pick one up instead of starting fresh.
+    const more = h('div', { class: 'cards' });
+    if (!fresh) {
+      request('sessions', { account: a.id, path: dir })
+        .then((data) => {
+          if (!data.sessions.length || !more.isConnected) return;
+          more.append(h('div', { class: 'group' }, h('b', { text: 'Or continue a session here' })));
+          data.sessions.slice(0, 4).forEach((s) => more.append(sessionRow(a, s, data.window)));
+        })
+        .catch(() => {});
+    }
     openSheet(
       h('div', { class: 'sheet-head' }, mascot(a.color, 'awake', 'sheet-m'), h('h3', { text: fresh ? `Start Claude in ${base(dir)}?` : base(dir) })),
       h('p', { class: 'note mono', text: dir }),
       h('p', { class: 'lead', text: `Claude Code starts in this folder on your PC with ${a.name}’s account. You’ll get a link that opens it in the Claude app.` }),
       err,
-      h('div', { class: 'sheet-foot' }, h('button', { class: 'btn secondary', text: 'Cancel', onclick: closeSheet }), go_));
+      h('div', { class: 'sheet-foot' }, h('button', { class: 'btn secondary', text: 'Cancel', onclick: closeSheet }), go_),
+      more);
+  }
+
+  /**
+   * Continues one of the account's sessions on the phone: Flock reopens it on
+   * the PC with Remote Control on. When the account's Claude window is open,
+   * the phone gets a copy, so the two never write to one conversation at once.
+   */
+  function continueSheet(a, s, windowOpen) {
+    const btn = h('button', { class: 'btn primary grow', text: 'Continue on phone' });
+    const err = h('p', { class: 'note err hidden' });
+    btn.addEventListener('click', async () => {
+      err.classList.add('hidden');
+      busy(btn, true, 'Starting…');
+      try {
+        const sv = await request('continue', { account: a.id, session: s.id });
+        S.servers.set(sv.id, sv);
+        sessionCache.delete(a.id);
+        closeSheet();
+        go({ v: 'server', id: sv.id });
+      } catch (e) {
+        err.textContent = e.message;
+        err.classList.remove('hidden');
+        busy(btn, false);
+      }
+    });
+    openSheet(
+      h('div', { class: 'sheet-head' }, mascot(a.color, 'awake', 'sheet-m'), h('h3', { text: s.title || base(s.cwd) })),
+      h('p', { class: 'note mono', text: `${short(s.cwd, 36)} · ${ago(s.at)}` }),
+      h('p', { class: 'lead', text: windowOpen
+        ? `${a.name}’s Claude window is open on your PC and may still be using this session, so your phone carries on with a copy of it, with everything said so far. The window keeps the original.`
+        : `Your phone carries on with this session itself, with everything said so far. When you open ${a.name}’s Claude window on your PC again, it goes back there.` }),
+      err,
+      h('div', { class: 'sheet-foot' }, h('button', { class: 'btn secondary', text: 'Cancel', onclick: closeSheet }), btn));
   }
 
   function promptCard(s) {
@@ -575,25 +666,36 @@
       trust: 'Claude Code hasn’t worked in this folder with this account yet. Only trust folders you made or know.',
       consent: 'Claude Code asks this once for this account’s sign-in on your PC.',
     }[p.kind];
-    const answer = async (yes, btn) => {
-      busy(btn, true, yes ? 'Sending…' : 'Sending…');
+    const answer = async (reply, btn) => {
+      busy(btn, true, 'Sending…');
       try {
-        await request('answer', { server: s.id, prompt: p.id, yes });
+        await request('answer', { server: s.id, prompt: p.id, ...reply });
       } catch (e) {
         toast(e.message, 'err');
         busy(btn, false);
       }
     };
-    const no = h('button', { class: 'btn secondary grow', text: labels[0] });
-    const yes = h('button', { class: 'btn primary grow', text: labels[1] });
-    no.addEventListener('click', () => answer(false, no));
-    yes.addEventListener('click', () => answer(true, yes));
+    let buttons;
+    if (p.options && p.options.length) {
+      // Any other pick-list Claude Code shows: one button per choice, as it lists them.
+      buttons = h('div', { class: 'choices' }, p.options.map((label, i) => {
+        const b = h('button', { class: `btn ${i === 0 ? 'primary' : 'secondary'} big`, text: label });
+        b.addEventListener('click', () => answer({ option: i }, b));
+        return b;
+      }));
+    } else {
+      const no = h('button', { class: 'btn secondary grow', text: labels[0] });
+      const yes = h('button', { class: 'btn primary grow', text: labels[1] });
+      no.addEventListener('click', () => answer({ yes: false }, no));
+      yes.addEventListener('click', () => answer({ yes: true }, yes));
+      buttons = h('div', { class: 'row2' }, no, yes);
+    }
     return h('div', { class: 'ask' },
       h('div', { class: 'ask-head' }, icon('warn'), h('b', { text: title })),
       why ? h('p', { class: 'note', text: why }) : null,
       h('p', { class: 'ask-q', text: p.ask }),
       p.text ? h('pre', { class: 'ask-text', text: p.text }) : null,
-      h('div', { class: 'row2' }, no, yes));
+      buttons);
   }
 
   function viewServer(view) {
@@ -604,23 +706,28 @@
       return page;
     }
     const a = S.accounts.find((x) => x.id === s.account);
-    page.append(topbar(s.name, { back: true, sub: `${s.accountName} · ${short(s.folder, 38)}` }));
+    const reopened = s.kind === 'session';
+    page.append(topbar(reopened ? s.title || s.name : s.name, { back: true, sub: `${s.accountName} · ${short(s.folder, 38)}` }));
     const mood = { starting: 'launching', asking: 'alert', ready: 'awake', failed: 'error', stopped: 'asleep' }[s.status];
     const hero = h('div', { class: 'hero', style: `--c:${s.color}` }, mascot(s.color, mood, 'hero-m'));
     page.append(hero);
 
     if (s.status === 'starting') {
-      page.append(h('p', { class: 'lead center', text: 'Starting Claude Code on your PC…' }));
+      page.append(h('p', { class: 'lead center', text: reopened ? 'Reopening this session on your PC…' : 'Starting Claude Code on your PC…' }));
     } else if (s.status === 'asking' && s.prompt) {
       page.append(promptCard(s));
     } else if (s.status === 'ready') {
       const first = s.sessions[0];
-      page.append(h('p', { class: 'lead center', text: `Running in ${s.name}. Open it in the Claude app.` }));
+      page.append(h('p', { class: 'lead center', text: reopened ? 'Remote Control is on. Open it in the Claude app to carry on.' : `Running in ${s.name}. Open it in the Claude app.` }));
       const openBtn = h('a', { class: 'btn primary big', href: first ? first.url : s.envUrl, target: '_blank', rel: 'noopener noreferrer' }, icon('open'), first ? 'Open the session' : 'Open in Claude');
       page.append(openBtn);
       const email = a && a.cli && a.cli.email;
       page.append(h('p', { class: 'note center', text: `It belongs to ${s.accountName}’s Claude account${email ? ` (${email})` : ''}: the Claude app has to be signed in to it.` }));
-      if (s.sessions.length) {
+      if (reopened) {
+        page.append(h('p', { class: 'note center', text: s.fork
+          ? `This is a copy: ${s.accountName}’s Claude window keeps the original. Back at your PC, Flock’s settings can open the copy in the window.`
+          : `When you open ${s.accountName}’s Claude window on your PC, the session goes back there.` }));
+      } else if (s.sessions.length) {
         page.append(h('h2', { text: 'Sessions in this folder' }));
         page.append(h('div', { class: 'cards' }, s.sessions.map((x) => h('a', { class: 'card', href: x.url, target: '_blank', rel: 'noopener noreferrer' },
           mascot(s.color, 'awake', 'acct-m'),
@@ -633,10 +740,12 @@
       }
     } else if (s.status === 'failed') {
       page.append(h('p', { class: 'note err', text: s.error || 'Claude Code stopped.' }));
-      if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s.folder) }, icon('refresh'), 'Try again'));
+      if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s) }, icon('refresh'), 'Try again'));
     } else {
-      page.append(h('p', { class: 'lead center', text: 'Stopped. Its sessions can’t be reached until it runs again.' }));
-      if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s.folder) }, icon('refresh'), 'Start it again'));
+      page.append(h('p', { class: 'lead center', text: reopened
+        ? 'Stopped on your PC. The conversation is saved; carry on with it again any time.'
+        : 'Stopped. Its sessions can’t be reached until it runs again.' }));
+      if (a) page.append(h('button', { class: 'btn primary big', onclick: (e) => retry(e.currentTarget, a, s) }, icon('refresh'), reopened ? 'Continue it again' : 'Start it again'));
     }
 
     if (['starting', 'asking', 'ready'].includes(s.status)) {
@@ -645,10 +754,12 @@
     return page;
   }
 
-  async function retry(btn, a, dir) {
+  async function retry(btn, a, old) {
     busy(btn, true, 'Starting…');
     try {
-      const s = await request('start', { account: a.id, path: dir });
+      const s = old.kind === 'session'
+        ? await request('continue', { account: a.id, session: old.session })
+        : await request('start', { account: a.id, path: old.folder });
       S.servers.set(s.id, s);
       go({ v: 'server', id: s.id }, true);
     } catch (e) {

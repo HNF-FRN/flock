@@ -184,6 +184,7 @@ async function poll() {
     for (const p of list) {
       const prev = live.get(p.id) || {};
       const f = found.get(p.id);
+      if (f && !(prev.pids && prev.pids.length)) phone.windowOpened(p.id);
       live.set(p.id, {
         ...prev,
         pids: f ? f.pids : [],
@@ -774,6 +775,7 @@ function wireIpc() {
   ipcMain.handle('phone:unpair', (_e, id) => phone.unpair(id));
   ipcMain.handle('phone:signIn', (_e, id) => phone.signIn(id));
   ipcMain.handle('phone:stop', (_e, id) => phone.stopServer(id));
+  ipcMain.handle('phone:openCopy', (_e, id) => phone.openCopy(id));
   ipcMain.handle('app:quit', () => app.quit());
   ipcMain.handle('app:openExternal', (_e, url) => {
     let u;
@@ -877,6 +879,7 @@ app.whenReady().then(async () => {
     isRunning: (id) => Boolean((live.get(id) || {}).pids && live.get(id).pids.length),
     version: app.getVersion(),
     scriptDir: app.getPath('userData'),
+    openInWindow: (id, url) => launchProfile(id, { url }),
     onChange: phoneChanged,
     toast,
     // Keep the pairing QR code out of screenshots and screen sharing while it shows.

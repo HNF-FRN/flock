@@ -10,6 +10,7 @@
 
 const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const { app, safeStorage, powerSaveBlocker } = require('electron');
 const qrcode = require('qrcode-generator');
 const Relay = require('../shared/relay');
@@ -203,14 +204,83 @@ async function startServer(accountId, dir) {
   return serverView(snap);
 }
 
-function answer(serverId, promptId, yes) {
-  if (!remote.answer(serverId, promptId, Boolean(yes))) throw new Error('That question was already answered, or has gone.');
+/** The account's Code sessions, newest first; only one folder's when `dir` is given. */
+async function listSessions(accountId, dir) {
+  const p = profileOr(accountId);
+  const running = new Map(remote.list().filter((s) => s.kind === 'session' && ['starting', 'asking', 'ready'].includes(s.status)).map((s) => [s.session, s.id]));
+  const list = await sessions.continuable(p, { folder: dir || null });
+  return {
+    window: deps.isRunning(p.id),
+    sessions: list.map((s) => ({ ...s, server: running.get(s.id) || null })),
+  };
+}
+
+/**
+ * Reopens one of the account's Code sessions with Remote Control on, so it
+ * carries on from the phone with all its history. When the account's Claude
+ * window is open it may still be using the session, and two programs writing
+ * one conversation would split it, so the phone then gets a copy (a fork with
+ * an id of Flock's choosing, which Claude's window can open later).
+ */
+async function continueSession(accountId, sessionId) {
+  const p = profileOr(accountId);
+  const s = sessionId ? await sessions.find(p, sessionId) : null;
+  if (!s || !s.cli) throw new Error('Flock can’t find that session on your PC any more.');
+  if (!s.cwd || !folders.isDir(s.cwd)) throw new Error('That session’s folder isn’t on your PC any more.');
+  const signIn = (await cli.signIns(deps.profiles(), opts().slots)).get(p.id);
+  if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
+  const forkId = deps.isRunning(p.id) ? crypto.randomUUID() : null;
+  const title = (s.title || path.basename(s.cwd)).replace(/[\r\n\t]+/g, ' ').slice(0, 80);
+  const args = ['--resume', s.cli];
+  if (forkId) args.push('--fork-session', '--session-id', forkId);
+  if (s.model) args.push('--model', s.model);
+  if (s.effort) args.push('--effort', s.effort);
+  if (opts().permissionMode !== 'default') args.push('--permission-mode', opts().permissionMode);
+  args.push('--remote-control', title);
+  const snap = await remote.start({
+    kind: 'session', account: p.id, folder: s.cwd, launcher: cli.launcher(), env: cli.envFor(signIn.dir), args, title, session: s.id, forkId,
+  });
+  remember(p.id, s.cwd);
+  return serverView(snap);
+}
+
+function answer(serverId, promptId, reply) {
+  if (!remote.answer(serverId, promptId, reply || {})) throw new Error('That question was already answered, or has gone.');
   return true;
 }
 
 function stopServer(serverId) {
   if (!remote.stop(serverId)) throw new Error('That folder isn’t running any more.');
   return true;
+}
+
+/**
+ * An account's Claude window just opened: the sessions the phone reopened in
+ * place for it go back to the window, so the two never write to one
+ * conversation at once.
+ */
+function windowOpened(id) {
+  const stopped = remote.handBack(id);
+  if (!stopped.length) return;
+  const p = deps.findProfile(id);
+  const names = stopped.map((t) => `“${t}”`).join(', ');
+  deps.toast(`${p ? `${p.name}’s` : 'A'} Claude window opened, so Flock stopped ${names} on the phone. It carries on in the window.`, 'info');
+}
+
+/**
+ * Opens the copy of a session the phone carried on, in its account's Claude
+ * window (Claude imports the conversation). Stops it on the phone first:
+ * Claude won't take over a conversation another program is still running.
+ */
+async function openCopy(serverId) {
+  const s = remote.get(serverId);
+  if (!s || !s.forkId || !sessions.UUID_RE.test(s.forkId)) throw new Error('That session has no copy to open.');
+  const running = () => ['starting', 'asking', 'ready'].includes((remote.get(serverId) || {}).status);
+  if (running()) {
+    remote.stop(serverId);
+    for (let waited = 0; running() && waited < 8000; waited += 200) await new Promise((r) => setTimeout(r, 200));
+  }
+  await deps.openInWindow(s.account, `claude://resume?session=${s.forkId}`);
 }
 
 // ── The link ────────────────────────────────────────────────────────────────
@@ -246,7 +316,9 @@ async function handle(dev, msg) {
     case 'folders': return listFolders(msg.account, folderArg(msg.path));
     case 'mkdir': return makeFolder(msg.account, folderArg(msg.parent), msg.name, msg.git);
     case 'start': return startServer(msg.account, folderArg(msg.path));
-    case 'answer': return answer(msg.server, msg.prompt, msg.yes);
+    case 'sessions': return listSessions(msg.account, folderArg(msg.path));
+    case 'continue': return continueSession(msg.account, typeof msg.session === 'string' ? msg.session : null);
+    case 'answer': return answer(msg.server, msg.prompt, { yes: Boolean(msg.yes), option: msg.option });
     case 'stop': return stopServer(msg.server);
     case 'forget':
       setTimeout(() => unpair(dev.id), 500); // after the reply has gone out
@@ -447,4 +519,4 @@ async function quit() {
   blocker = null;
 }
 
-module.exports = { init, view, setOptions, pair, cancelPairing, unpair, signIn, stopServer, quit, refresh: () => cli.forget() };
+module.exports = { init, view, setOptions, pair, cancelPairing, unpair, signIn, stopServer, windowOpened, openCopy, quit, refresh: () => cli.forget() };

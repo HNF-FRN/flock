@@ -585,6 +585,7 @@
     if (s.status === 'asking') return ['Waiting for your answer on the phone', 'warn'];
     if (s.status === 'starting') return ['Starting…', 'warn'];
     if (s.status === 'ready') {
+      if (s.kind === 'session') return ['Remote Control on', 'ok'];
       const n = s.sessions.length;
       return [n ? `Running · ${n} session${n > 1 ? 's' : ''}` : 'Running', 'ok'];
     }
@@ -692,23 +693,32 @@
 
     // Servers
     const list = $('phoneServers');
-    list.innerHTML = phone.servers.length ? '' : '<p class="hint">Nothing yet. Folders you start from your phone show up here.</p>';
+    list.innerHTML = phone.servers.length ? '' : '<p class="hint">Nothing yet. What you start or continue from your phone shows up here.</p>';
     for (const s of phone.servers) {
       const [text, tone] = serverLine(s);
       const r = document.createElement('div');
       r.className = 'pline';
       r.innerHTML = `<span class="pdot"></span><div class="pmain"><b></b><span class="psub"></span></div>`;
       r.querySelector('.pdot').style.background = s.color;
-      r.querySelector('b').textContent = `${s.name} · ${s.accountName}`;
+      r.querySelector('b').textContent = `${s.kind === 'session' ? s.title || s.name : s.name} · ${s.accountName}`;
       r.querySelector('b').title = s.folder;
       const sub = r.querySelector('.psub');
-      sub.textContent = text;
+      sub.textContent = s.kind === 'session' ? `${s.fork ? 'Copy of a session' : 'Session'} · ${text}` : text;
       sub.className = `psub ${tone}`;
       if (['starting', 'asking', 'ready'].includes(s.status)) {
         const b = document.createElement('button');
         b.className = 'btn secondary small';
         b.textContent = 'Stop';
         b.addEventListener('click', () => api.phone.stop(s.id).catch(() => {}));
+        r.appendChild(b);
+      }
+      // A copy carried on from the phone can come back to the account's window.
+      if (s.fork) {
+        const b = document.createElement('button');
+        b.className = 'btn secondary small';
+        b.textContent = `Open in ${s.accountName}’s window`;
+        b.title = 'Stops it on the phone and opens the copy, with what you did on the phone, in Claude';
+        b.addEventListener('click', () => api.phone.openCopy(s.id).catch((e) => toast(String((e && e.message) || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ''), 'err')));
         r.appendChild(b);
       }
       list.appendChild(r);

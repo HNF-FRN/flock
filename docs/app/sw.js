@@ -3,7 +3,7 @@
 // this cache when it doesn't. Messages to your PC (the relay, another site)
 // never pass through here. scripts/phone-app.mjs renames the cache whenever
 // the app changes, so phones drop the old copy.
-const CACHE = 'flock-201cb653d2';
+const CACHE = 'flock-d5d75a2558';
 const FILES = [
   './',
   'index.html',

@@ -75,6 +75,7 @@
     servers: [
       { id: 'rc1', account: 'p1', accountName: 'Work', color: '#38BDF8', folder: `${work}\\client-portal`, name: 'client-portal', status: 'ready', sessions: [{ url: 'https://claude.ai/code/session_x', title: 'Pricing table' }, { url: 'https://claude.ai/code/session_y', title: null }], startedAt: now - 3600000 },
       { id: 'rc2', account: 'main', accountName: 'Main', color: '#D97757', folder: `${work}\\new-idea`, name: 'new-idea', status: 'asking', sessions: [], startedAt: now - 60000 },
+      { id: 'rc4', kind: 'session', account: 'main', accountName: 'Main', color: '#D97757', folder: `${work}\\studio-site`, name: 'studio-site', title: 'Hero scroll animation polish', fork: true, forkId: '00000000-0000-4000-8000-000000000000', status: 'ready', sessions: [{ url: 'https://claude.ai/code/session_z', title: 'Hero scroll animation polish' }], startedAt: now - 300000 },
       { id: 'rc3', account: 'main', accountName: 'Main', color: '#D97757', folder: `${work}\\scratch`, name: 'scratch', status: 'failed', error: 'Remote Control did not start: C:\\Users\\you\\work\\scratch is not trusted.', sessions: [], startedAt: now - 7200000 },
     ],
     permissionMode: 'default',
@@ -123,6 +124,7 @@
       unpair(id) { phoneView.devices = phoneView.devices.filter((d) => d.id !== id); emit('phone'); return delay(); },
       signIn(id) { emit('toast', { text: `(would open a sign-in window for ${id})` }); return delay(); },
       stop(id) { const s = phoneView.servers.find((x) => x.id === id); if (s) s.status = 'stopped'; emit('phone'); return delay(); },
+      openCopy(id) { emit('toast', { text: `(would open ${id}'s copy in its account's Claude window)` }); return delay(); },
     },
     quitApp: () => delay(),
     openExternal: () => delay(),

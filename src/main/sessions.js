@@ -18,6 +18,7 @@ const path = require('path');
 const claude = require('./claude');
 
 const ID_RE = /^local_[A-Za-z0-9-]{1,64}$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const FILE_RE = /^local_[A-Za-z0-9-]{1,64}\.json$/; // removed sessions are renamed deleted_*
 const POPOUTS_FILE = 'session-popouts.json';
 const cache = new Map(); // file -> { mtime, session }
@@ -63,6 +64,10 @@ async function load(file) {
         cwd: typeof j.cwd === 'string' ? j.cwd : null,
         at: Number(j.lastActivityAt || j.createdAt) || 0,
         archived: Boolean(j.isArchived),
+        // The Claude Code conversation behind it, and how it ran, so the phone can pick it up.
+        cli: UUID_RE.test(j.cliSessionId || '') ? j.cliSessionId : null,
+        model: typeof j.model === 'string' && /^[A-Za-z0-9._:[\]-]{1,64}$/.test(j.model) ? j.model : null,
+        effort: ['low', 'medium', 'high', 'xhigh', 'max'].includes(j.effort) ? j.effort : null,
       };
     }
   } catch {}
@@ -143,6 +148,18 @@ async function find(profile, id) {
   return null;
 }
 
+/**
+ * The account's sessions the phone can continue, newest first, archived ones
+ * left out; only those in `folder` when given: [{ id, title, cwd, folder, at }].
+ */
+async function continuable(profile, { folder, limit = 60 } = {}) {
+  const key = (p) => String(p || '').replace(/[\\/]+$/, '').toLowerCase();
+  return (await everyone(profile))
+    .filter((s) => !s.archived && s.cli && s.cwd && (!folder || key(s.cwd) === key(folder)))
+    .slice(0, limit)
+    .map((s) => ({ id: s.id, title: s.title, cwd: s.cwd, folder: path.basename(s.cwd), at: s.at }));
+}
+
 /** The folders the account's Code sessions ran in, newest first: [{ path, at }]. */
 async function recentFolders(profile, limit = 12) {
   const seen = new Set();
@@ -176,4 +193,4 @@ async function orgOf(profile) {
   return best ? best.org : null;
 }
 
-module.exports = { ID_RE, recent, find, popouts, recentFolders, orgOf };
+module.exports = { ID_RE, UUID_RE, recent, find, popouts, recentFolders, continuable, orgOf };

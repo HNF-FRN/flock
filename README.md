@@ -110,7 +110,7 @@ You need Windows 11 (10 may work, but it isn't tested) and [Claude Desktop](http
 
 ## Use Flock from your phone
 
-Flock can start Claude Code on your PC while you're away, in any account and any project folder (even one you create from your phone), and give you a link that opens the session in the Claude app.
+Flock can start Claude Code on your PC while you're away, in any account and any project folder (even one you create from your phone), and give you a link that opens the session in the Claude app. It can also turn Remote Control on for a session you already started on the PC, so you carry on with it from the Claude app.
 
 You need [Claude Code](https://claude.com/claude-code) (the CLI) on the PC, and a Pro, Max, Team or Enterprise plan for each account you use this way. Remote Control doesn't work with API keys.
 
@@ -119,12 +119,14 @@ You need [Claude Code](https://claude.com/claude-code) (the CLI) on the PC, and 
 3. Under **Claude Code sign-in for each account**, press **Sign in** next to each account that isn't ready, and sign in with that account's Claude login in the browser that opens. You do this once per account.
 4. On the phone, tap an account. Pick a recent project, or browse to a folder or create a new one, then tap **Start Claude here**. If Claude Code asks whether to trust the folder (or, the first time, whether to turn on Remote Control), its question shows on your phone word for word, and your answer goes back to it.
 5. Tap **Open the session**. The Claude app has to be signed in to that same Claude account. **Start another session here** opens a fresh session in the same folder, for when a session's context is full.
+6. To carry on with a session you started on the PC, open the account's **Sessions** tab (sessions are grouped by project; picking a project lists its sessions too), tap one and then **Continue on phone**. Flock reopens it with Remote Control on, with everything said so far.
 
 <details>
 <summary><b>How the phone part works</b></summary>
 <br>
 
 - Each folder runs `claude remote-control`, the [Remote Control](https://code.claude.com/docs/en/remote-control) server from Claude Code, under that account's Claude Code sign-in. Flock runs it in a pseudo-console, so Claude Code asks its own questions there. Flock passes each question to your phone and types only your answer. It never answers a question itself and never sends a prompt: what Claude does is up to you, in the Claude app.
+- A session you continue is reopened with `claude --resume … --remote-control`, in its folder, with its model. While the account's Claude window is open it may still be using that session, and two programs writing one conversation would split it, so your phone then carries on with a copy and the window keeps the original. Back at the PC, **Settings → Phone** opens the copy in the window, with what you did on the phone. With the window closed, your phone carries on with the session itself, and when you open the window again, Flock stops it on the phone so the window can take over.
 - Claude Code keeps one sign-in per `CLAUDE_CONFIG_DIR`, and an account with its own `~/.claude` uses that folder's. Of the accounts that share `~/.claude`, one uses Claude Code's default sign-in. A second sets `CLAUDE_CONFIG_DIR` to `~/.claude` itself: Claude Code keeps that as a separate sign-in over the same settings, skills, CLAUDE.md and memory. Flock matches sign-ins to accounts by organization. A third sharing account needs its own `~/.claude`. Flock reads sign-in status from `claude auth status` and never touches credentials.
 - Flock for Android (`android/`) is a small native app around the same page, with Google's code scanner for the pairing code; session links open in the Claude app. GitHub Actions builds and signs it for each release.
 - The phone app is a static page in `docs/app`, served by GitHub Pages. It talks to Flock through [ntfy.sh](https://ntfy.sh), a public publish/subscribe relay, over ordinary outgoing HTTPS: no open ports, no tunnel, no account. Every message is end-to-end encrypted (AES-256-GCM) with a key that exists only on your PC (sealed with Windows' DPAPI) and your phone. The key travels once, in the QR code, which shows only in Flock's settings and is left out of screenshots and screen sharing.

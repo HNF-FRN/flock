@@ -44,6 +44,7 @@ contextBridge.exposeInMainWorld('flock', {
     unpair: (id) => ipcRenderer.invoke('phone:unpair', id),
     signIn: (id) => ipcRenderer.invoke('phone:signIn', id),
     stop: (id) => ipcRenderer.invoke('phone:stop', id),
+    openCopy: (id) => ipcRenderer.invoke('phone:openCopy', id),
   },
   quitApp: () => ipcRenderer.invoke('app:quit'),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),

@@ -379,6 +379,36 @@ h3 {
   color: var(--dim-3);
 }
 
+/* Session lists: a project's name over its sessions */
+
+.group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 10px 4px 0;
+  min-width: 0;
+}
+
+.group b {
+  font: 600 13.5px var(--font);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.group .mono {
+  font-size: 11.5px;
+  color: var(--dim-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* ── Tabs ── */
 
 .tabs {
@@ -697,7 +727,7 @@ input:focus {
 #toast {
   position: fixed;
   left: 50%;
-  top: calc(env(safe-area-inset-top) + 12px);
+  top: calc(env(safe-area-inset-top) + 64px); /* under the top bar, clear of its title */
   transform: translate(-50%, -12px);
   max-width: calc(100vw - 32px);
   padding: 11px 16px;
