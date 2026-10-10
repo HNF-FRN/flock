@@ -8,6 +8,7 @@
 // link starts and stops them and passes on Claude Code's own questions, but
 // never carries a prompt, so it can't tell Claude what to do.
 
+const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
@@ -36,6 +37,7 @@ let blocker = null;
 let recentCache = { at: 0, list: [] };
 
 const opts = () => store.get().phone;
+const signingIn = new Map(); // Claude Code sign-in key -> { id, dir, done }: sign-in windows not finished yet
 
 // ── Keys ────────────────────────────────────────────────────────────────────
 // A paired phone's key is kept sealed with Windows' DPAPI (Electron's
@@ -51,6 +53,25 @@ function unseal(v) {
     if (v.startsWith('raw:')) return v.slice(4);
   } catch {}
   return null;
+}
+
+/**
+ * Each account's Claude Code sign-in (cli.signIns). A sign-in finished in a
+ * window Flock opened is from then on that account's.
+ */
+function accountSignIns(extra) {
+  for (const [key, w] of signingIn) {
+    if (!fs.existsSync(w.done)) continue;
+    signingIn.delete(key);
+    try { fs.unlinkSync(w.done); } catch {}
+    store.update((d) => {
+      d.phone.owners[key] = w.id;
+      if (!w.dir) d.phone.renew = false;
+    });
+    cli.forget();
+    log('phone', 'signed in', w.id, w.dir || '(default sign-in)');
+  }
+  return cli.signIns(deps.profiles(), opts(), extra);
 }
 
 // ── Views ───────────────────────────────────────────────────────────────────
@@ -81,7 +102,7 @@ function serverView(snap) {
 
 async function state() {
   const profiles = deps.profiles();
-  const signIns = await cli.signIns(profiles, opts());
+  const signIns = await accountSignIns();
   return {
     pc: { name: os.hostname(), version: deps.version },
     accounts: profiles.map((p) => ({
@@ -203,7 +224,7 @@ async function startServer(accountId, dir) {
   if (!folders.allowed(dir, await rootList(), await everyRecent())) {
     throw new Error('That folder isn’t in your project folders. Add it in Flock’s settings on the PC.');
   }
-  const signIn = (await cli.signIns(deps.profiles(), opts())).get(p.id);
+  const signIn = (await accountSignIns()).get(p.id);
   if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
   const launcher = cli.launcher();
   const spawnMode = opts().spawn === 'worktree' && folders.isGitRepo(dir) ? 'worktree' : 'same-dir';
@@ -237,7 +258,7 @@ async function continueSession(accountId, sessionId) {
   const s = sessionId ? await sessions.find(p, sessionId) : null;
   if (!s || !s.cli) throw new Error('Flock can’t find that session on your PC any more.');
   if (!s.cwd || !folders.isDir(s.cwd)) throw new Error('That session’s folder isn’t on your PC any more.');
-  const signIn = (await cli.signIns(deps.profiles(), opts())).get(p.id);
+  const signIn = (await accountSignIns()).get(p.id);
   if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
   const forkId = deps.isRunning(p.id) ? crypto.randomUUID() : null;
   const title = (s.title || path.basename(s.cwd)).replace(/[\r\n\t]+/g, ' ').slice(0, 80);
@@ -471,7 +492,7 @@ function unpair(id) {
 async function view({ fresh } = {}) {
   const o = opts();
   const profiles = deps.profiles();
-  const signIns = await cli.signIns(profiles, o, { fresh });
+  const signIns = await accountSignIns({ fresh });
   const roots = await rootList();
   return {
     enabled: o.enabled,
@@ -500,16 +521,17 @@ async function setOptions(patch) {
   deps.onChange();
 }
 
-/** Opens a terminal to sign this account's Claude Code in, and remembers that this sign-in is the account's. */
+/**
+ * Opens a terminal to sign this account's Claude Code in. Once that sign-in
+ * succeeds, it is the account's (accountSignIns); closing the window first
+ * changes nothing.
+ */
 async function signIn(id) {
   const p = profileOr(id);
-  const s = (await cli.signIns(deps.profiles(), opts())).get(p.id);
+  const s = (await accountSignIns()).get(p.id);
   if (!s || s.problem === 'unsupported') throw new Error(problemText(p, s || {}));
-  store.update((d) => {
-    d.phone.owners[s.key] = p.id;
-    if (!s.dir) d.phone.renew = false;
-  });
-  cli.openSignIn(s.dir, { title: `Flock: sign ${p.name} in to Claude Code`, account: p.name, scriptDir: deps.scriptDir });
+  const done = cli.openSignIn(s.dir, { title: `Flock: sign ${p.name} in to Claude Code`, account: p.name, scriptDir: deps.scriptDir });
+  signingIn.set(s.key, { id: p.id, dir: s.dir, done });
   log('phone', 'sign-in window for', p.name, s.dir || '(default sign-in)');
 }
 

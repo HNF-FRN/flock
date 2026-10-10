@@ -158,13 +158,27 @@ function forget() {
 }
 
 /**
+ * Whether the ~/.claude sign-in may be another account's than the one `claude
+ * auth status` names (`st`). Signing in with CLAUDE_CONFIG_DIR set to
+ * ~/.claude, as Flock 0.2.1 did for a second account, writes over that one
+ * sign-in but keeps the name in ~/.claude/.claude.json, not ~/.claude.json.
+ * When the two names differ, the sign-in is whichever was signed in last.
+ */
+async function overwritten(st, opts) {
+  if (!st.loggedIn) return false;
+  const named = await status(claude.DEFAULT_CONFIG_DIR, opts);
+  return Boolean(named.loggedIn && (named.email || named.orgId) && (named.email !== st.email || named.orgId !== st.orgId));
+}
+
+/**
  * Each account's Claude Code sign-in: Map(id -> { dir, key, holder, status,
  * ok, problem }). `dir` is the CLAUDE_CONFIG_DIR it runs with (null: not
  * set) and `key` names that folder's sign-in. Of the accounts that share a
  * folder, only the `holder` (an account id) can use its sign-in; for the
  * others the problem is 'unsupported'. `owners` holds the accounts signed in
- * from Flock (key -> id). With `renew`, the ~/.claude sign-in has to be
- * signed in again before Flock trusts whose it is.
+ * from Flock (key -> id). With `renew`, or when the ~/.claude sign-in may
+ * have been written over and nobody signed in to it from Flock since, it has
+ * to be signed in again before Flock trusts whose it is.
  */
 async function signIns(profiles, { owners = {}, renew = false } = {}, opts = {}) {
   const folders = new Map(); // key -> { dir, members }
@@ -178,12 +192,15 @@ async function signIns(profiles, { owners = {}, renew = false } = {}, opts = {})
   await Promise.all([...folders].map(async ([key, { dir, members }]) => {
     const st = await status(dir, opts);
     const orgs = await Promise.all(members.map((p) => (st.orgId ? sessions.orgOf(p) : null)));
+    const doubt = !dir && (renew || (!owners[key] && await overwritten(st, opts)));
     // Whose the sign-in is: the account signed in from Flock, else the one in
-    // its organization, else the first.
+    // its organization, else the first. Among several (accounts of one
+    // organization), the account whose own folder it is goes first.
     let holder = members.find((p) => p.id === owners[key]);
     if (!holder) {
       const match = members.filter((p, i) => st.orgId && orgs[i] === st.orgId);
-      holder = match.length === 1 ? match[0] : members[0];
+      const own = (p) => Boolean(p.config && p.config.mode === 'own');
+      holder = match.find(own) || match[0] || members.find(own) || members[0];
     }
     members.forEach((p, i) => {
       const s = { dir, key, holder: holder.id, status: p === holder ? st : null };
@@ -191,7 +208,7 @@ async function signIns(profiles, { owners = {}, renew = false } = {}, opts = {})
       // A sign-in to another organization than the account's sessions is
       // another Claude account: its sessions would not reach this account's phone.
       else if (!st.problem && orgs[i] && st.orgId !== orgs[i]) s.problem = 'other-account';
-      else if (!st.problem && renew && !dir) s.problem = 'renew';
+      else if (!st.problem && doubt) s.problem = 'renew';
       else s.problem = st.problem;
       s.ok = !s.problem;
       out.set(p.id, s);
@@ -203,7 +220,8 @@ async function signIns(profiles, { owners = {}, renew = false } = {}, opts = {})
 /**
  * Opens a terminal window that runs `claude auth login` for this sign-in and
  * stays open, so the result can be read. The browser it opens is where the
- * account's claude.ai login goes.
+ * account's claude.ai login goes. Returns the file that appears once the
+ * sign-in succeeded (closing the window first leaves it out).
  */
 function openSignIn(dir, { title, account, scriptDir }) {
   const l = launcher();
@@ -211,6 +229,8 @@ function openSignIn(dir, { title, account, scriptDir }) {
   const ascii = (s) => String(s || '').replace(/[^\x20-\x7e]/g, '').replace(/[&|<>^%"]/g, '');
   // A small script, so quoting stays simple and the window waits at the end.
   const script = path.join(scriptDir, `sign-in-${ascii(account).replace(/[^A-Za-z0-9-]/g, '') || 'account'}.cmd`);
+  const done = script.replace(/\.cmd$/, '.done');
+  try { fs.unlinkSync(done); } catch {}
   const lines = [
     '@echo off',
     'chcp 65001 >nul',
@@ -219,7 +239,8 @@ function openSignIn(dir, { title, account, scriptDir }) {
     `echo   Sign in to Claude Code with the Claude account you use for ${ascii(account)}.`,
     'echo   A browser opens: make sure it is that account before you approve.',
     'echo.',
-    `"${l.exe}" auth login`,
+    `call "${l.exe}" auth login`, // `call`, or npm's claude.cmd would end this script
+    `if not errorlevel 1 type nul > "${done}"`,
     'echo.',
     `echo   Done? Close this window and go back to Flock.`,
     'pause >nul',
@@ -232,6 +253,7 @@ function openSignIn(dir, { title, account, scriptDir }) {
   });
   c.unref();
   forget();
+  return done;
 }
 
 module.exports = { locate, launcher, envFor, status, forget, signIns, openSignIn };
