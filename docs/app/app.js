@@ -286,11 +286,18 @@
   const PROBLEMS = {
     'signed-out': 'Claude Code isn’t signed in for this account on your PC.',
     'other-account': 'Claude Code on your PC is signed in to another Claude account here.',
+    renew: 'Claude Code on your PC has to be signed in again here: another account may have taken over its sign-in.',
     'not-claude-ai': 'Claude Code uses an API key here; Remote Control needs a claude.ai sign-in.',
-    unsupported: 'It shares ~/.claude with two other accounts. Give it its own ~/.claude in Flock.',
+    unsupported: 'It shares ~/.claude, and so its Claude Code sign-in, with another account. Give it its own ~/.claude in Flock.',
     'no-cli': 'Claude Code isn’t installed on your PC.',
     unknown: 'Flock couldn’t check Claude Code for this account.',
   };
+
+  function problemOf(a) {
+    const c = a.cli || {};
+    if (c.problem === 'unsupported' && c.holder) return `It shares ~/.claude, and so its Claude Code sign-in, with ${c.holder}. Give it its own ~/.claude in Flock.`;
+    return PROBLEMS[c.problem] || PROBLEMS.unknown;
+  }
 
   function usageBits(u) {
     if (!u) return null;
@@ -414,7 +421,7 @@
         mascot(a.color, ok ? 'awake' : 'asleep', 'acct-m'),
         h('div', { class: 'card-main' },
           h('b', { text: a.name }),
-          ok ? usageBits(a.usage) || h('span', { class: 'sub', text: 'Ready' }) : h('span', { class: 'sub warn', text: PROBLEMS[a.cli && a.cli.problem] || PROBLEMS.unknown })),
+          ok ? usageBits(a.usage) || h('span', { class: 'sub', text: 'Ready' }) : h('span', { class: 'sub warn', text: problemOf(a) })),
         icon('chev'));
       list.append(card);
     }
@@ -426,7 +433,7 @@
 
   function pickAccount(a) {
     if (a.cli && a.cli.ok) { go({ v: 'folders', account: a.id }); return; }
-    const problem = PROBLEMS[a.cli && a.cli.problem] || PROBLEMS.unknown;
+    const problem = problemOf(a);
     const how = a.cli && a.cli.problem === 'no-cli'
       ? 'Install Claude Code on your PC (claude.com/claude-code), then come back.'
       : a.cli && a.cli.problem === 'unsupported'

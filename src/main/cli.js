@@ -5,23 +5,25 @@
 // it asks Claude Code (`claude auth status`) and opens a terminal window for
 // `claude auth login`.
 //
-// Claude Code keeps one sign-in per CLAUDE_CONFIG_DIR value, and one more for
-// when it isn't set. An account with its own ~/.claude uses that folder's.
-// Accounts that share ~/.claude can't all use one sign-in, so one of them runs
-// with CLAUDE_CONFIG_DIR unset and another names ~/.claude explicitly, which
-// Claude Code keeps as a second sign-in over the same files (settings, skills,
-// CLAUDE.md, memory). Which account gets which follows the organization each
-// sign-in belongs to, or the choice made when signing in from Flock.
+// Claude Code keeps one sign-in per config folder: on Windows, the
+// .credentials.json in CLAUDE_CONFIG_DIR, or in ~/.claude when that isn't set.
+// An account with its own ~/.claude uses that folder's. The accounts that run
+// Claude Code with the same folder (those that share ~/.claude, or one
+// account's own folder through "Same as…") share its one sign-in, so only one
+// of them can use it: the one signed in to it from Flock, else the one in the
+// sign-in's organization, else the first. The others need their own ~/.claude.
+// (Setting CLAUDE_CONFIG_DIR to ~/.claude itself makes a second sign-in only on
+// macOS, where the Keychain keeps it apart. On Windows it is the same file,
+// so both accounts would run as whichever signed in last.)
 
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const claude = require('./claude');
 const sessions = require('./sessions');
-const { HOME, APPDATA, pathKey } = require('./util');
+const { HOME, APPDATA, pathKey, samePath } = require('./util');
 
 const STATUS_TTL = 5 * 60 * 1000;
-const SLOTS = ['default', 'explicit']; // the two sign-ins accounts sharing ~/.claude can have
 
 function isFile(p) {
   try { return fs.statSync(p).isFile(); } catch { return false; }
@@ -74,8 +76,9 @@ function launcher() {
 /**
  * The environment Claude Code runs with for one sign-in (`dir` null: the
  * default one). Variables of the session that may have started Flock, API
- * keys and other endpoints are left out: Remote Control needs a claude.ai
- * sign-in talking to Anthropic directly.
+ * keys, other endpoints and other places to keep the sign-in are left out:
+ * Remote Control needs this sign-in, a claude.ai one, talking to Anthropic
+ * directly.
  */
 function envFor(dir) {
   const env = {};
@@ -87,8 +90,11 @@ function envFor(dir) {
   return env;
 }
 
-function dirOfSlot(slot) {
-  return slot === 'explicit' ? claude.DEFAULT_CONFIG_DIR : null;
+/** The CLAUDE_CONFIG_DIR an account's Claude Code runs with, or null to leave it unset (~/.claude). */
+function dirOf(profile, profiles) {
+  const dir = claude.configDirOf(profile, profiles);
+  // ~/.claude named outright is still ~/.claude's one sign-in: run it as such.
+  return dir && !samePath(dir, claude.DEFAULT_CONFIG_DIR) ? dir : null;
 }
 
 // ── Sign-in status ──────────────────────────────────────────────────────────
@@ -152,62 +158,44 @@ function forget() {
 }
 
 /**
- * Each account's Claude Code sign-in: Map(id -> { dir, slot, status, ok,
- * problem }). `dir` is the CLAUDE_CONFIG_DIR it runs with (null: not set);
- * `slot` says which of the two shared sign-ins a ~/.claude-sharing account
- * uses; `chosen` holds slots picked earlier (id -> slot).
+ * Each account's Claude Code sign-in: Map(id -> { dir, key, holder, status,
+ * ok, problem }). `dir` is the CLAUDE_CONFIG_DIR it runs with (null: not
+ * set) and `key` names that folder's sign-in. Of the accounts that share a
+ * folder, only the `holder` (an account id) can use its sign-in; for the
+ * others the problem is 'unsupported'. `owners` holds the accounts signed in
+ * from Flock (key -> id). With `renew`, the ~/.claude sign-in has to be
+ * signed in again before Flock trusts whose it is.
  */
-async function signIns(profiles, chosen = {}, opts = {}) {
-  const out = new Map();
-  const shared = [];
+async function signIns(profiles, { owners = {}, renew = false } = {}, opts = {}) {
+  const folders = new Map(); // key -> { dir, members }
   for (const p of profiles) {
-    const dir = claude.configDirOf(p, profiles);
-    if (dir) out.set(p.id, { dir, slot: null });
-    else shared.push(p);
+    const dir = dirOf(p, profiles);
+    const key = keyOf(dir);
+    if (!folders.has(key)) folders.set(key, { dir, members: [] });
+    folders.get(key).members.push(p);
   }
-
-  // Which shared account goes with which sign-in: the one chosen in Flock,
-  // else the one whose organization matches, else in list order.
-  const slotOf = new Map();
-  const free = new Set(SLOTS);
-  for (const p of shared) {
-    const s = chosen[p.id];
-    if (free.has(s)) { slotOf.set(p.id, s); free.delete(s); }
-  }
-  if (shared.some((p) => !slotOf.has(p.id)) && free.size) {
-    const orgs = new Map();
-    await Promise.all([...free].map(async (s) => { orgs.set(s, (await status(dirOfSlot(s), opts)).orgId); }));
-    for (const p of shared) {
-      if (slotOf.has(p.id)) continue;
-      const org = await sessions.orgOf(p);
-      const match = org ? [...free].filter((s) => orgs.get(s) === org) : [];
-      if (match.length === 1) { slotOf.set(p.id, match[0]); free.delete(match[0]); }
+  const out = new Map();
+  await Promise.all([...folders].map(async ([key, { dir, members }]) => {
+    const st = await status(dir, opts);
+    const orgs = await Promise.all(members.map((p) => (st.orgId ? sessions.orgOf(p) : null)));
+    // Whose the sign-in is: the account signed in from Flock, else the one in
+    // its organization, else the first.
+    let holder = members.find((p) => p.id === owners[key]);
+    if (!holder) {
+      const match = members.filter((p, i) => st.orgId && orgs[i] === st.orgId);
+      holder = match.length === 1 ? match[0] : members[0];
     }
-  }
-  for (const p of shared) {
-    if (slotOf.has(p.id) || !free.size) continue;
-    const s = [...free][0];
-    slotOf.set(p.id, s);
-    free.delete(s);
-  }
-  for (const p of shared) {
-    const slot = slotOf.get(p.id);
-    out.set(p.id, slot ? { dir: dirOfSlot(slot), slot } : { dir: null, slot: null, unsupported: true });
-  }
-
-  await Promise.all(profiles.map(async (p) => {
-    const s = out.get(p.id);
-    if (s.unsupported) {
-      s.problem = 'unsupported';
-      return;
-    }
-    s.status = await status(s.dir, opts);
-    s.problem = s.status.problem;
-    // A sign-in to another organization than the account's sessions is
-    // another Claude account: its sessions would not reach this account's phone.
-    const org = s.status.orgId ? await sessions.orgOf(p) : null;
-    if (!s.problem && org && s.status.orgId !== org) s.problem = 'other-account';
-    s.ok = !s.problem;
+    members.forEach((p, i) => {
+      const s = { dir, key, holder: holder.id, status: p === holder ? st : null };
+      if (p !== holder) s.problem = 'unsupported';
+      // A sign-in to another organization than the account's sessions is
+      // another Claude account: its sessions would not reach this account's phone.
+      else if (!st.problem && orgs[i] && st.orgId !== orgs[i]) s.problem = 'other-account';
+      else if (!st.problem && renew && !dir) s.problem = 'renew';
+      else s.problem = st.problem;
+      s.ok = !s.problem;
+      out.set(p.id, s);
+    });
   }));
   return out;
 }

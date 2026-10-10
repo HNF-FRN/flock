@@ -518,6 +518,7 @@
         closeSheet();
         toast('Saved', 'ok');
       }
+      if (phone && phone.enabled) loadPhone(); // its ~/.claude decides its Claude Code sign-in
     } catch (e) {
       btn.disabled = false;
       btn.textContent = editing && editing.isNew ? 'Add & sign in' : 'Save';
@@ -574,8 +575,9 @@
     switch (c.problem) {
       case 'signed-out': return ['Not signed in', 'warn', 'Sign in…'];
       case 'other-account': return [`Signed in to another account: ${c.email || '?'}`, 'err', 'Sign in again…'];
+      case 'renew': return ['Sign in again: another account may have taken over this sign-in', 'warn', 'Sign in again…'];
       case 'not-claude-ai': return ['Uses an API key, not a claude.ai sign-in', 'warn', 'Sign in…'];
-      case 'unsupported': return ['Give it its own ~/.claude to use it from your phone', '', null];
+      case 'unsupported': return [`Shares ~/.claude, and so its sign-in, with ${c.holder || 'another account'}. Give it its own ~/.claude to use it from your phone`, '', 'Edit…'];
       case 'no-cli': return ['Claude Code isn’t installed', 'err', null];
       default: return ['Checking…', '', null];
     }
@@ -654,6 +656,10 @@
         b.className = 'btn secondary small';
         b.textContent = action;
         b.addEventListener('click', async () => {
+          if (a.cli.problem === 'unsupported') {
+            openSheet(a.id);
+            return;
+          }
           try {
             await api.phone.signIn(a.id);
             signingInAt = Date.now();
