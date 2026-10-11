@@ -1,7 +1,7 @@
 {
   "name": "flock",
   "productName": "Flock",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Run Claude Desktop with several accounts side by side.",
   "author": "HNF-FRN",
   "license": "MIT",
