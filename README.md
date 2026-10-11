@@ -7,6 +7,7 @@
   <img src="https://img.shields.io/badge/platform-Windows-4ADE80?style=flat-square&labelColor=0E0F11" alt="Windows">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-C084FC?style=flat-square&labelColor=0E0F11" alt="MIT license"></a>
   <img src="https://img.shields.io/badge/built%20with-Claude%20Code-D97757?style=flat-square&labelColor=0E0F11" alt="Built with Claude Code">
+  <a href="https://docs.ntfy.sh/integrations/#projects-scripts"><img src="https://img.shields.io/badge/featured%20on-ntfy-338574?style=flat-square&labelColor=0E0F11" alt="Featured on ntfy"></a>
 </p>
 
 https://github.com/user-attachments/assets/90dac482-ff69-4043-b519-5b57860b855c
@@ -258,6 +259,7 @@ The film at the top is made in code too: plain HTML, CSS and JS rendered frame b
 
 - The island's look and palette follow [Coucou](https://github.com/Louis-CFM/coucou)'s MIT-licensed code (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 - Flock's mascot is its own character, made for Flock. It isn't Anthropic's Clawd or Coucou's Mochi.
+- Phone messages travel through [ntfy](https://ntfy.sh). Flock is listed in ntfy's [Projects + scripts](https://docs.ntfy.sh/integrations/#projects-scripts) ([binwiederhier/ntfy#2029](https://github.com/binwiederhier/ntfy/pull/2029)).
 - Film music: "Cat Walk" by Arulo, under the Mixkit Stock Music Free License. Sound effects from Mixkit.
 - Flock ships no Anthropic artwork. The coloured Claude icons are drawn at run time from the copy of Claude on your PC, so keep them out of screenshots you publish.
 
