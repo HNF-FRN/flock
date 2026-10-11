@@ -128,7 +128,7 @@ You need [Claude Code](https://claude.com/claude-code) (the CLI) on the PC, and 
 
 - **Start a session.** Tap an account. Pick a recent project, browse to a folder or create a new one (as a git repository if you like). Give the session a name if you like (it's how the Claude app lists it), then tap **Start Claude here**. Then tap **Open the session**; the Claude app has to be signed in to that same Claude account. With a name, each start is a new conversation of its own, and **Continue it again** after stopping it reopens that conversation. Without one, Claude Code names the session from your first message, and **Start another session here** opens a fresh one in the same folder, for when a session's context is full.
 - **Continue a session you started on the PC.** Open the account's **Sessions** tab (sessions are grouped by project, and picking a project lists its sessions too), tap one, change its name if you like, then **Continue on phone**. Flock reopens it with Remote Control on, with everything said so far.
-- **Answer Claude Code.** When Claude Code asks whether to trust a folder, or the first time whether to turn on Remote Control, its question shows on your phone word for word, and your answer goes back to it.
+- **Answer Claude Code.** When Claude Code asks whether to trust a folder, or the first time whether to turn on Remote Control, its question shows on your phone word for word, and your answer goes back to it. So does its one-time setup (a colour theme, then security notes to read), the first time a sign-in opens a session this way.
 - **Stop** a session on the phone, or in **Settings → Phone** on the PC.
 
 <p align="center">

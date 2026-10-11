@@ -310,9 +310,14 @@ function envBlock(env) {
 /**
  * Starts `file args…` in a pseudo-console. Resolves to a terminal:
  * { pid, write(text), kill(), onData(cb(text)), onExit(cb(code)) }; code is
- * null when the helper itself went away.
+ * null when the helper itself went away. The program is told it runs in an
+ * xterm-like terminal (TERM), as the pseudo-console is one: without it, a
+ * program started from Explorer may think the terminal can't show Unicode
+ * (Claude Code then draws its pick-list cursor as ">" instead of "❯").
  */
 async function open({ file, args = [], cwd, env = process.env, cols = 200, rows = 50 }) {
+  env = Object.fromEntries(Object.entries(env).filter(([k]) => k.toUpperCase() !== 'TERM'));
+  env.TERM = 'xterm-256color';
   await boot();
   const id = `t${++seq}`;
   const dataCbs = [];
