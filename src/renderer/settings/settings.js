@@ -718,12 +718,13 @@
         b.addEventListener('click', () => api.phone.stop(s.id).catch(() => {}));
         r.appendChild(b);
       }
-      // A copy carried on from the phone can come back to the account's window.
-      if (s.fork) {
+      // A copy carried on from the phone, or a session started there, can come
+      // back to the account's window, under its project.
+      if (s.fork || (s.kind === 'new' && s.conversation)) {
         const b = document.createElement('button');
         b.className = 'btn secondary small';
         b.textContent = `Open in ${s.accountName}’s window`;
-        b.title = 'Stops it on the phone and opens the copy, with what you did on the phone, in Claude';
+        b.title = 'Stops it on the phone and opens it, with what you did on the phone, in Claude under its project';
         b.addEventListener('click', () => api.phone.openCopy(s.id).catch((e) => toast(String((e && e.message) || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, ''), 'err')));
         r.appendChild(b);
       }

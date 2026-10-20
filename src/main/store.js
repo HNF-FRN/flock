@@ -37,6 +37,7 @@ const DEFAULT_PHONE = {
   spawn: 'same-dir', // sessions the Claude app adds to a server: 'same-dir' or 'worktree' (git)
   keepAwake: true, // keep the PC from sleeping while a phone is paired
   recent: [], // [{ account, path, at }] folders started from the phone
+  running: [], // [{ kind, account, folder, title, conversation, session, forkId, at }] sessions to reopen when Flock starts again
   owners: {}, // Claude Code sign-in (cli.js) -> the account id it was signed in for from Flock
   pending: {}, // account id -> { key, done }: sign-in windows Flock opened, until `done` shows they succeeded
   renew: false, // ~/.claude's own sign-in has to be signed in again before Flock trusts whose it is
@@ -47,6 +48,7 @@ function normalizePhone(raw) {
   p.devices = Array.isArray(p.devices) ? p.devices.filter((d) => d && d.id && d.topic && d.key) : [];
   p.roots = Array.isArray(p.roots) ? p.roots.filter((r) => typeof r === 'string' && r) : [];
   p.recent = Array.isArray(p.recent) ? p.recent.filter((r) => r && r.account && r.path).slice(0, 40) : [];
+  p.running = Array.isArray(p.running) ? p.running.filter((r) => r && r.account && r.folder && ['new', 'session', 'folder'].includes(r.kind)).slice(0, 20) : [];
   p.owners = p.owners && typeof p.owners === 'object' ? p.owners : {};
   p.pending = p.pending && typeof p.pending === 'object' ? p.pending : {};
   for (const [id, w] of Object.entries(p.pending)) if (!w || typeof w.key !== 'string' || typeof w.done !== 'string') delete p.pending[id];

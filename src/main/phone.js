@@ -29,12 +29,15 @@ const SEEN_SAVE_MS = 60 * 1000;
 const FIVE_HOURS = 5 * 60 * 60 * 1000;
 const WEEK = 7 * 24 * 60 * 60 * 1000;
 const MAX_DIRS = 200;
+const REOPEN_WITHIN = 3 * 24 * 60 * 60 * 1000; // sessions Flock's quitting stopped come back if it starts again within this
+const REOPEN_DELAY = 8000; // after start, once Flock knows which Claude windows are open
 
 let deps = null; // { profiles, findProfile, isRunning, version, onChange, toast, scriptDir }
 const channels = new Map(); // device id -> relay channel
 let pairing = null; // { topic, key, until, channel, url, svg, timer }
 let blocker = null;
 let recentCache = { at: 0, list: [] };
+let quitting = false;
 
 const opts = () => store.get().phone;
 // Where Flock keeps the second Claude Code sign-in for ~/.claude (cli.js), one folder per account.
@@ -352,19 +355,21 @@ function windowOpened(id) {
 }
 
 /**
- * Opens the copy of a session the phone carried on, in its account's Claude
- * window (Claude imports the conversation). Stops it on the phone first:
- * Claude won't take over a conversation another program is still running.
+ * Opens what the phone carried on in its account's Claude window, under its
+ * project: the copy of a session, or a new session's conversation (Claude
+ * imports it). Stops it on the phone first: Claude won't take over a
+ * conversation another program is still running.
  */
 async function openCopy(serverId) {
   const s = remote.get(serverId);
-  if (!s || !s.forkId || !sessions.UUID_RE.test(s.forkId)) throw new Error('That session has no copy to open.');
+  const id = s && (s.forkId || (s.kind === 'new' ? s.conversation : null));
+  if (!id || !sessions.UUID_RE.test(id)) throw new Error('That session has no conversation to open.');
   const running = () => ['starting', 'asking', 'ready'].includes((remote.get(serverId) || {}).status);
   if (running()) {
     remote.stop(serverId);
     for (let waited = 0; running() && waited < 8000; waited += 200) await new Promise((r) => setTimeout(r, 200));
   }
-  await deps.openInWindow(s.account, `claude://resume?session=${s.forkId}`);
+  await deps.openInWindow(s.account, `claude://resume?session=${id}`);
 }
 
 // ── The link ────────────────────────────────────────────────────────────────
@@ -597,18 +602,79 @@ async function forgetAccount(id) {
   await cli.signOut(id, storeRoot());
 }
 
+// ── Carrying on after Flock restarts ────────────────────────────────────────
+// The phone's sessions run in Flock's own pseudo-consoles, so they stop when
+// Flock quits, and the Claude app then shows them as "Can't reach your
+// computer". Flock keeps a list of the ones running (phone.running) and, when
+// it starts again, reopens each with --resume: the same conversation, which
+// Claude links to the same session in the Claude app, so it reconnects. One
+// the phone or the PC stopped, or that ended by itself, leaves the list.
+
+const runKey = (s) => `${s.account}|${s.kind}|${s.kind === 'folder' ? pathKey(s.folder) : s.kind === 'new' ? s.conversation : s.forkId || s.session}`;
+
+function track(snap) {
+  const live = ['starting', 'asking', 'ready'].includes(snap.status);
+  if (snap.status !== 'ready' && (live || quitting)) return;
+  const key = runKey(snap);
+  store.update((d) => {
+    const rest = d.phone.running.filter((r) => runKey(r) !== key);
+    d.phone.running = snap.status === 'ready'
+      ? [{ kind: snap.kind, account: snap.account, folder: snap.folder, title: snap.title, conversation: snap.conversation, session: snap.session, forkId: snap.forkId, at: Date.now() }, ...rest]
+      : rest;
+  });
+}
+
+/** Reopens one session from phone.running; null when the account's window has it. */
+async function reopen(r) {
+  if (r.kind === 'new') return startServer(r.account, r.folder, r.title, r.conversation);
+  if (r.kind === 'folder') return startServer(r.account, r.folder, null, null);
+  if (!r.forkId) {
+    // Reopened in place: the account's window takes it back when it's open.
+    if (deps.isRunning(r.account)) return null;
+    return continueSession(r.account, r.session, r.title);
+  }
+  const p = profileOr(r.account);
+  const signIn = (await accountSignIns()).get(p.id);
+  if (!signIn || !signIn.ok) throw new Error(problemText(p, signIn || {}));
+  if (!hasConversation(signIn.dir, r.forkId)) throw new Error('its conversation is gone');
+  const args = ['--resume', r.forkId];
+  if (opts().permissionMode !== 'default') args.push('--permission-mode', opts().permissionMode);
+  args.push('--remote-control', r.title || 'Claude Code');
+  return remote.start({ kind: 'session', account: p.id, folder: r.folder, launcher: cli.launcher(), env: cli.envFor(signIn), args, title: r.title, session: r.session, forkId: r.forkId });
+}
+
+async function reopenAll() {
+  const now = Date.now();
+  const list = opts().running;
+  store.update((d) => { d.phone.running = []; }); // each goes back on the list once it is ready again
+  for (const r of list) {
+    if (now - (r.at || 0) > REOPEN_WITHIN) continue;
+    try {
+      const snap = await reopen(r);
+      log('phone reopened', r.kind, r.account, r.folder, r.title ? `"${r.title}"` : '', snap ? snap.id : '(its window has it)');
+    } catch (e) {
+      log('phone could not reopen', r.kind, r.account, r.folder, e.message);
+    }
+  }
+}
+
 // ── Lifecycle ───────────────────────────────────────────────────────────────
 
 function init(d) {
   deps = d;
   remote.watch((snap) => {
+    track(snap);
     broadcast({ t: 'server', server: serverView(snap) });
     deps.onChange();
   });
   sync();
+  if (opts().running.length) setTimeout(() => reopenAll().catch((e) => log('phone reopen failed', e.message)), REOPEN_DELAY);
 }
 
 async function quit() {
+  quitting = true;
+  // What runs now comes back the next time Flock starts.
+  store.update((d) => { for (const r of d.phone.running) r.at = Date.now(); });
   cancelPairing();
   await remote.stopAll();
   disconnectAll();
