@@ -13,6 +13,8 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const procscan = require('./procscan');
+const datamove = require('./datamove');
+const { log } = require('./log');
 const { HOME, APPDATA, LOCALAPPDATA, exists, pathKey, samePath, splitCommandLine, switchValue } = require('./util');
 
 const STORE_FAMILIES = ['Claude_pzs8sxrjxfjjc', 'AnthropicPBC.Claude_fnn82j28hfe8t'];
@@ -48,6 +50,11 @@ function packageFamilies() {
   return [...found];
 }
 
+/** Package families that are installed for this user (their Packages folder exists). */
+function installedFamilies() {
+  return packageFamilies().filter((fam) => exists(path.join(LOCALAPPDATA, 'Packages', fam)));
+}
+
 // ── Data folders ────────────────────────────────────────────────────────────
 
 function dataDirOf(profile) {
@@ -67,6 +74,9 @@ function physicalDirs(dataDir) {
       out.push(path.join(LOCALAPPDATA, 'Packages', fam, 'LocalCache', 'Roaming', path.basename(dataDir)));
     }
   }
+  // Claude may have moved it to %LOCALAPPDATA%\Claude-Data (see datamove.js).
+  const moved = datamove.movedTo(dataDir, packageFamilies());
+  if (moved) out.push(moved);
   return out;
 }
 
@@ -230,11 +240,22 @@ function spawnDetached(file, args, env) {
   });
 }
 
+/**
+ * Keeps each account in its own data folder before one starts: Claude Desktop
+ * now moves one account's data to a shared place and opens every other
+ * account from it (see datamove.js).
+ */
+function guardData(profiles, launching = null) {
+  const dirs = profiles.map(dataDirOf).filter(Boolean);
+  datamove.guard(dirs, installedFamilies(), { launching: launching && dataDirOf(launching), log });
+}
+
 /** Starts (or, when it is already open, focuses) an account's Claude window. */
 async function launch(profile, profiles, { url } = {}) {
   const where = locate();
   if (!where) throw new Error('Claude Desktop is not installed (no claude-desktop.exe or AnthropicClaude found).');
   if (profile.kind !== 'default' && !profile.dataDir) throw new Error('This account has no data folder.');
+  if (where.kind === 'store') guardData(profiles, profile);
   return spawnDetached(where.launcher, argsFor(profile, url), envFor(profile, profiles));
 }
 
@@ -354,6 +375,7 @@ module.exports = {
   readAccount,
   readUsage,
   configDirOf,
+  guardData,
   SESSION_VAR_RE,
   NEVER_PASS_RE,
   launch,

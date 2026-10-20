@@ -859,6 +859,7 @@ app.whenReady().then(async () => {
   wireIpc();
   const where = claude.locate();
   log('start', `Flock ${app.getVersion()}`, app.isPackaged ? 'installed' : 'dev', where ? `${where.kind} ${where.launcher}` : 'Claude not found');
+  if (where && where.kind === 'store') claude.guardData(profiles());
   createTray();
   createIsland();
   windows.init({
